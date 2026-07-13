@@ -27,5 +27,16 @@ module.exports = defineConfig({
         redisUrl: process.env.REDIS_URL,
       },
     },
+    AUTH: {
+      resolve: "@medusajs/medusa/auth",
+      options: {
+        providers: [
+          {
+            resolve: "@medusajs/medusa/auth-emailpass",
+            id: "emailpass",
+          },
+        ],
+      },
+    },
   },
 })
