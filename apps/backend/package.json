@@ -55,13 +55,7 @@
   },
   "packageManager": "pnpm@11.5.0",
   "pnpm": {
-    "onlyBuiltDependencies": [
-      "@medusajs/telemetry",
-      "@swc/core",
-      "esbuild",
-      "msgpackr-extract",
-      "protobufjs"
-    ]
+    "neverBuiltDependencies": []
   },
   "engines": {
     "node": ">=22.13.0"
