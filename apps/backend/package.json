@@ -54,6 +54,15 @@
     "yalc": "^1.0.0-pre.53"
   },
   "packageManager": "pnpm@11.5.0",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@medusajs/telemetry",
+      "@swc/core",
+      "esbuild",
+      "msgpackr-extract",
+      "protobufjs"
+    ]
+  },
   "engines": {
     "node": ">=22.13.0"
   }
