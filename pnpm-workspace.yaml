@@ -1,0 +1,16 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+allowBuilds:
+  '@medusajs/telemetry': false
+  '@swc/core': false
+  esbuild: false
+  msgpackr-extract: false
+  protobufjs: false
+  sharp: false
+  unrs-resolver: false
+
+overrides:
+  "@types/react": "19.0.5"
+  "@types/react-dom": "19.0.5"

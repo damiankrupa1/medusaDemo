@@ -1,7 +1,6 @@
 {
   "name": "medusaDemo",
   "private": false,
-  "packageManager": "npm@11.13.0",
   "engines": {
     "node": ">=20"
   },
@@ -15,20 +14,11 @@
     "backend:dev": "turbo dev --filter=@dtc/backend",
     "storefront:dev": "turbo dev --filter=@dtc/storefront"
   },
-  "pnpm": {
-    "overrides": {
-      "@types/react": "19.0.5",
-      "@types/react-dom": "19.0.5"
-    }
-  },
   "devDependencies": {
-    "turbo": "^2.0.14",
-    "prettier": "^3.2.5"
+    "@medusajs/cli": "2.15.3",
+    "prettier": "^3.2.5",
+    "turbo": "^2.0.14"
   },
-  "workspaces": [
-    "apps/**",
-    "!apps/backend/.medusa/**"
-  ],
   "overrides": {
     "ajv": "^8.0.0"
   }
