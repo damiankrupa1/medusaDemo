@@ -4,6 +4,11 @@ import { Modules } from '@medusajs/framework/utils'
 loadEnv(process.env.NODE_ENV || 'development', process.cwd())
 
 module.exports = defineConfig({
+  //test
+  admin: {
+    disable: process.env.ADMIN_DISABLED === "true" ||
+      false,
+  },
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
     redisUrl: process.env.REDIS_URL,
