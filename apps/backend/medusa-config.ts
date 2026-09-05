@@ -9,6 +9,9 @@ module.exports = defineConfig({
     disable: process.env.ADMIN_DISABLED === "true" ||
       false,
   },
+  featureFlags: {
+    translation: true,
+  },
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
     redisUrl: process.env.REDIS_URL,
@@ -27,6 +30,12 @@ module.exports = defineConfig({
       options: {
         redisUrl: process.env.REDIS_URL,
       },
+    },
+    [Modules.TRANSLATION]: {
+      resolve: "@medusajs/medusa/translation",
+    },
+    localized_slugs: {
+      resolve: "./src/modules/localized-slugs",
     },
   },
 })
