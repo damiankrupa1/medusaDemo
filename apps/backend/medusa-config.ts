@@ -34,5 +34,8 @@ module.exports = defineConfig({
     [Modules.TRANSLATION]: {
       resolve: "@medusajs/medusa/translation",
     },
+    localized_slugs: {
+      resolve: "./src/modules/localized-slugs",
+    },
   },
 })
