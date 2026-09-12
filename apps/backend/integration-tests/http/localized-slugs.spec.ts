@@ -13,6 +13,13 @@ const ADMIN_EMAIL = "localized-slugs-test-admin@example.com"
 const ADMIN_PASSWORD = "supersecret"
 
 medusaIntegrationTestRunner({
+  // medusaIntegrationTestRunner truncates every table between tests by
+  // default. This suite creates its auth user, sales channel and
+  // publishable API key once in beforeAll and relies on them for every
+  // test, so the default per-test truncation would wipe them out after
+  // the first test runs (each test also creates its own uniquely-titled
+  // product, so nothing here depends on a clean slate between tests).
+  disableAutoTeardown: true,
   testSuite: ({ api, getContainer }) => {
     const createProduct = async (title: string) => {
       const container = getContainer()

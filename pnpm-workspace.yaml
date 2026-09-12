@@ -14,3 +14,13 @@ allowBuilds:
 overrides:
   "@types/react": "19.0.5"
   "@types/react-dom": "19.0.5"
+  # Pinned to match what the monorepo's own lockfile resolves. Without
+  # this, apps/backend/.medusa/server's standalone `pnpm install --prod`
+  # (no lockfile of its own, but this file is copied in) freshly resolves
+  # the newest matching 6.6.x patch (6.6.12) instead of 6.6.1, and that
+  # newer patch hangs indefinitely partway through `medusa db:migrate`
+  # against a fresh database - reproduced directly, isolated by diffing
+  # resolved package versions between a working native run and a hanging
+  # containerized one (everything else - @mikro-orm/core, knex, pg -
+  # matched exactly).
+  "@mikro-orm/migrations": "6.6.1"

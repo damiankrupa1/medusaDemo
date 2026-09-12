@@ -1,0 +1,91 @@
+name: medusa-demo
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: medusa
+      POSTGRES_PASSWORD: medusa
+      POSTGRES_DB: medusa
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U medusa -d medusa"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # S3-compatible object storage for local dev. In production this is
+  # replaced by a real S3-compatible service (Railway Bucket, AWS S3,
+  # Cloudflare R2, ...) - only the S3_* env vars change, not the code.
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      # Remapped from MinIO's default 9000 - the Medusa backend dev server
+      # already listens on host port 9000.
+      - "9002:9000"
+      - "9091:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # One-shot job: creates the bucket used by the backend and makes it
+  # publicly readable so uploaded product/variant images are servable
+  # directly from S3_FILE_URL. Runs once and exits.
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 minioadmin minioadmin &&
+      mc mb --ignore-existing local/medusa-media &&
+      mc anonymous set download local/medusa-media
+      "
+
+  # Meilisearch is optional and NOT required to run Medusa. Enable it only
+  # if/when search is actually added to the project:
+  #   docker compose --profile search up -d
+  meilisearch:
+    image: getmeili/meilisearch:v1.9
+    restart: unless-stopped
+    profiles: ["search"]
+    environment:
+      MEILI_MASTER_KEY: minioadmin_placeholder_change_me
+      MEILI_NO_ANALYTICS: "true"
+    ports:
+      - "7700:7700"
+    volumes:
+      - meilisearch_data:/meili_data
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+  meilisearch_data:

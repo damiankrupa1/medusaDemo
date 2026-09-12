@@ -66,7 +66,7 @@ The fastest way to get started is deploying with [Medusa Cloud](https://cloud.me
 > **Prerequisites:
 >
 > - [Node.js](https://nodejs.org/) v20+
-> - [PostgreSQL](https://www.postgresql.org/) v15+
+> - [PostgreSQL](https://www.postgresql.org/) v15+ (or [Docker](https://www.docker.com/), see below)
 > - [pnpm](https://pnpm.io/) v10+
 
 1. Clone the repository and install dependencies:
@@ -83,12 +83,30 @@ pnpm install
 cp apps/backend/.env.template apps/backend/.env
 ```
 
-3. Set the database URL in `apps/backend.env`:
+3. Get PostgreSQL and Redis running, either:
 
-```bash
-# Replace with actual database URL, make sure the database exists.
-DATABASE_URL=postgres://postgres:@localhost:5432/medusa-dtc-starter
-```
+   - **Docker** (no local install needed) - starts PostgreSQL, Redis and
+     an S3-compatible MinIO for local file storage:
+
+     ```bash
+     docker compose up -d
+     ```
+
+     Then set in `apps/backend/.env`:
+
+     ```bash
+     DATABASE_URL=postgres://medusa:medusa@localhost:5432/medusa
+     REDIS_URL=redis://localhost:6379
+     ```
+
+     Full details (ports, MinIO setup, resetting data): [docs/local-development.md](docs/local-development.md).
+
+   - **Native install** - set the database URL in `apps/backend/.env`:
+
+     ```bash
+     # Replace with actual database URL, make sure the database exists.
+     DATABASE_URL=postgres://postgres:@localhost:5432/medusa-dtc-starter
+     ```
 
 4. Run migrations:
 
@@ -151,6 +169,15 @@ The storefront is configured via environment variables in `apps/storefront/.env.
 | `NEXT_PUBLIC_DEFAULT_REGION` | Default region country code | `dk` |
 | `NEXT_PUBLIC_BASE_URL` | Base URL of the storefront | `https://localhost:8000` |
 | `NEXT_PUBLIC_STRIPE_KEY` | Stripe publishable key (optional) | — |
+
+## Deployment
+
+The backend (`apps/backend`) deploys as a Docker image (`Dockerfile.backend`)
+to Railway - Server and Worker services from the same image, PostgreSQL,
+Redis and S3-compatible storage. Full setup (required services, environment
+variables, health checks, backups): [docs/deployment-railway.md](docs/deployment-railway.md).
+
+The storefront (`apps/storefront`) deploys separately to Vercel.
 
 ## Resources
 

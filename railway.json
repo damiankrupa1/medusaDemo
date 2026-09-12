@@ -1,0 +1,14 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "Dockerfile.backend"
+  },
+  "deploy": {
+    "preDeployCommand": ["node", "../../node_modules/@medusajs/cli/cli.js", "db:migrate"],
+    "healthcheckPath": "/health/ready",
+    "healthcheckTimeout": 30,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 3
+  }
+}
