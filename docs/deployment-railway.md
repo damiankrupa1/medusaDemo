@@ -145,11 +145,12 @@ change.
 
 ## 6. Database migrations
 
-`railway.json`'s `deploy.preDeployCommand` runs `pnpm migrate`
-(`medusa db:migrate`) once, before the new deploy's start command, on the
-**Server** service only (`railway.worker.json`, used by the Worker service,
-does not set `preDeployCommand` - migrations should only run once per
-deploy, not once per service).
+`railway.json`'s `deploy.preDeployCommand` runs
+`node ../../node_modules/@medusajs/cli/cli.js db:migrate` once, before the new
+deploy's start command, on the **Server** service only
+(`railway.worker.json`, used by the Worker service, does not set
+`preDeployCommand` - migrations should only run once per deploy, not once
+per service).
 
 Deployment order this produces:
 
@@ -158,15 +159,70 @@ PostgreSQL/Redis available
         ↓
 new image built
         ↓
-preDeployCommand: pnpm migrate   (Server service only)
+preDeployCommand: medusa db:migrate   (Server service only)
         ↓
-pnpm start                       (Server, then Worker)
+medusa start                          (Server, then Worker)
         ↓
-healthcheckPath: /health/ready   (Server only - gates traffic cutover)
+healthcheckPath: /health/ready        (Server only - gates traffic cutover)
 ```
 
 Never add a destructive command (`db reset`, `drop database`, demo seed) to
 this path - migrations only.
+
+### Why the image doesn't run its own `pnpm install --prod`
+
+Medusa's own docs have you `cd apps/backend/.medusa/server && npm install`
+in production - a fresh, lockfile-less install in that directory. That
+reliably reproduced a real bug during testing: with no lockfile to pin it,
+that install resolved whatever patch version of each dependency was newest
+*that day*, not what the rest of the monorepo was actually built and
+tested against. Concretely, `@mikro-orm/migrations` drifted from this
+repo's lockfile-pinned `6.6.1` to `6.6.12`, and `6.6.12` hung forever
+partway through `medusa db:migrate` on a fresh database - found by diffing
+resolved package versions between a working native run and a hanging
+containerized one.
+
+`Dockerfile.backend`'s production stage avoids this whole bug class: it
+copies the monorepo's already-installed, lockfile-verified
+`node_modules` (both `/repo/node_modules` and
+`/repo/apps/backend/node_modules`, preserving pnpm's relative symlink
+structure) instead of running a second, independent install. `.medusa/server`
+has no `node_modules` of its own; Node's normal upward module resolution
+from its compiled files finds everything in `apps/backend/node_modules`,
+with the exact versions actually built and tested.
+
+### Known open issue - verify on an actual Railway deploy
+
+Even with dependency versions now provably identical to a known-working
+native run (down to the same physical `node_modules` files, not just
+matching version numbers), `medusa db:migrate` still hangs indefinitely on
+a fresh database *specifically when run inside a container on this
+machine's Docker Desktop/WSL2 setup* - while the exact same compiled code,
+same `node_modules`, run natively (no container) on the same machine
+against the same Postgres migrates and seeds successfully in seconds, and
+`medusa start` in the container connects to Postgres/Redis and serves
+`/health/ready` correctly. Ruled out as causes: network/DNS/TCP
+reachability (fast and correct both ways), Postgres-side locks (none -
+`pg_stat_activity` showed the connection idle, waiting on the *client*),
+raw `pg` driver connectivity through the same container network (connects
+and queries in under 30ms), `NODE_ENV`, compiled-vs-ts-node config
+loading, and CPU count.
+
+This points at something specific to Docker Desktop's Windows/WSL2
+virtualization layer affecting Medusa's `db:migrate` code path in
+particular (not `start`), not a defect in this Dockerfile, the app code, or
+the dependency versions - but that couldn't be fully confirmed without
+Linux infrastructure to compare against. **Before relying on
+`preDeployCommand` for a real deploy, watch the first Server deploy's
+build/deploy logs on Railway itself** to confirm the migration step
+actually completes (Railway runs on real Linux, not a Windows-hosted
+WSL2 VM, so this is expected to just work there - but that expectation
+hasn't been directly verified against Railway's own infrastructure). If it
+does hang there too, the fallback is running migrations directly against
+the Railway Postgres from a normal (non-`.medusa/server`) checkout - e.g.
+`railway run --service <server> pnpm --filter=@dtc/backend medusa db:migrate`
+from a machine with the full monorepo installed - since that path is the
+one actually proven to work.
 
 ## 7. Admin dashboard
 
@@ -278,7 +334,8 @@ non-production environment before you need it for real.
 | `ETIMEDOUT`/`ECONNREFUSED` to S3-compatible storage | `S3_FORCE_PATH_STYLE` missing for a non-AWS provider | Set `S3_FORCE_PATH_STYLE=true` for Railway Bucket/R2/MinIO |
 | CORS errors from the storefront | Storefront's real Vercel domain isn't in `STORE_CORS`/`AUTH_CORS` | Update the CORS env vars, redeploy |
 | Worker service never processes anything | `WORKER_MODE` not set to `worker` on that service | Check the Worker service's env vars |
-| Migrations didn't run | `preDeployCommand` only exists on the Server service's `railway.json`, not the Worker's | Confirm the Server service is using `railway.json`, and that its deploy log shows the `pnpm migrate` step |
+| Migrations didn't run | `preDeployCommand` only exists on the Server service's `railway.json`, not the Worker's | Confirm the Server service is using `railway.json`, and that its deploy log shows the `medusa db:migrate` step |
+| `preDeployCommand` hangs / deploy never progresses past migrations | See [Known open issue](#known-open-issue---verify-on-an-actual-railway-deploy) above - reproduced locally in Docker Desktop/WSL2, not confirmed on Railway's own infrastructure | Check the deploy log's timestamp progress; if it's genuinely stuck (not just a large migration set taking a while), fall back to running `medusa db:migrate` from a full monorepo checkout against the Railway Postgres instead of relying on `preDeployCommand` |
 
 ## Remaining / not implemented
 

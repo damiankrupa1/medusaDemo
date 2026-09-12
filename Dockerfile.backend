@@ -20,24 +20,46 @@ COPY . .
 RUN pnpm install --frozen-lockfile
 RUN pnpm --filter=@dtc/backend build
 
-# ---- Production stage: only `apps/backend/.medusa/server`, the
-# self-contained deployable Medusa produces (its own package.json,
-# compiled src, compiled medusa-config.js, built Admin static assets).
-# This is Medusa's own documented production artifact - see
-# https://docs.medusajs.com/learn/production - not a shortcut invented
-# here, and it intentionally carries no lockfile of its own.
+# ---- Production stage.
+#
+# `apps/backend/.medusa/server` is Medusa's own documented production
+# artifact (compiled src, compiled medusa-config.js, built Admin static
+# assets) - see https://docs.medusajs.com/learn/production. Medusa's own
+# docs have you `cd .medusa/server && npm install` there, a fresh,
+# lockfile-less install. That reliably reproduces a real bug: with no
+# lockfile to pin it, that install resolves whatever patch version of
+# each dependency is newest *today*, not what the rest of the monorepo
+# was built and tested against. Concretely, this repo's own lockfile
+# pins @mikro-orm/migrations to 6.6.1, but the standalone install kept
+# resolving 6.6.12 - and 6.6.12 hangs forever partway through
+# `medusa db:migrate` on a fresh database (confirmed by diffing resolved
+# versions between a working native run and a hanging containerized one,
+# with every other package - @mikro-orm/core, knex, pg - matching
+# exactly). Pinning that one package as a workaround (via
+# pnpm-workspace.yaml's `overrides`) was not enough by itself to trust
+# this path for every other transitive dependency too.
+#
+# So instead of a second, independent install, this stage reuses the
+# monorepo's own already-installed, lockfile-verified node_modules
+# as-is. pnpm's node_modules are a symlink farm (each workspace's
+# node_modules/<pkg> is a *relative* symlink into the shared
+# node_modules/.pnpm store) - copying both directories with the same
+# relative layout preserves those symlinks correctly. .medusa/server
+# has no node_modules of its own, so Node's normal upward module
+# resolution from its compiled files finds everything in
+# apps/backend/node_modules instead, with the exact versions actually
+# built and tested against.
 FROM base AS production
 ENV NODE_ENV=production
-WORKDIR /app
-COPY --from=build /repo/apps/backend/.medusa/server ./
-# .medusa/server has no pnpm-workspace.yaml of its own, so pnpm has no
-# allowBuilds allowlist here and refuses (hard error, not just a warning,
-# on this pnpm version) to run native postinstall scripts for packages
-# like sharp/esbuild - reuse the monorepo's own allowlist so the runtime
-# native builds (sharp, esbuild, msgpackr-extract, protobufjs) actually run.
-COPY --from=build /repo/pnpm-workspace.yaml ./pnpm-workspace.yaml
-RUN pnpm install --prod
+WORKDIR /repo
+COPY --from=build /repo/node_modules ./node_modules
+COPY --from=build /repo/apps/backend/node_modules ./apps/backend/node_modules
+COPY --from=build /repo/apps/backend/.medusa/server ./apps/backend/.medusa/server
+WORKDIR /repo/apps/backend/.medusa/server
 
 EXPOSE 9000
 
-CMD ["pnpm", "start"]
+# Not `node_modules/.bin/medusa` - that's a shell-script wrapper (fails
+# under a plain `node <path>` invocation); this is the actual JS
+# entrypoint it wraps.
+CMD ["node", "../../node_modules/@medusajs/cli/cli.js", "start"]
