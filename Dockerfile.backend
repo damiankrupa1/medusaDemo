@@ -40,6 +40,19 @@ WORKDIR /repo
 
 COPY . .
 RUN pnpm install --frozen-lockfile
+
+# TEMPORARY diagnostics - the exact same Dockerfile builds and runs
+# correctly with a local `docker build`, but `node .../node_modules/
+# @medusajs/cli/cli.js` fails with MODULE_NOT_FOUND at container start
+# specifically on Railway's remote builder. These print (without ever
+# failing the build) whether the symlink and its target actually exist
+# right after install, so the next Railway build log shows real evidence
+# instead of another guess. Remove once this is root-caused.
+RUN ls -la apps/backend/node_modules/@medusajs/cli/ || echo "DIAG: apps/backend/node_modules/@medusajs/cli listing failed"
+RUN readlink -f apps/backend/node_modules/@medusajs/cli || echo "DIAG: readlink failed"
+RUN find node_modules/.pnpm -maxdepth 1 -iname "@medusajs+cli@*" || echo "DIAG: not found in .pnpm store"
+RUN test -f apps/backend/node_modules/@medusajs/cli/cli.js && echo "DIAG: cli.js exists" || echo "DIAG: cli.js MISSING"
+
 RUN pnpm --filter=@dtc/backend build
 
 ENV NODE_ENV=production
