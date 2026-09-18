@@ -39,20 +39,19 @@ RUN corepack enable && corepack prepare pnpm@11.5.0 --activate
 WORKDIR /repo
 
 COPY . .
+
+# NODE_ENV is pinned to development *for the install only*. Railway's
+# builder sets NODE_ENV=production in the build environment, and with
+# that set pnpm links the workspace differently: a Railway build log
+# showed @medusajs/cli present in node_modules/.pnpm but with no
+# apps/backend/node_modules/@medusajs/cli symlink created, so the
+# container crash-looped on
+# "Cannot find module '.../node_modules/@medusajs/cli/cli.js'" while the
+# identical image built locally (where NODE_ENV is unset) ran fine.
+# devDependencies are needed here anyway - `medusa build` bundles the
+# Admin dashboard with vite/typescript.
+ENV NODE_ENV=development
 RUN pnpm install --frozen-lockfile
-
-# TEMPORARY diagnostics - the exact same Dockerfile builds and runs
-# correctly with a local `docker build`, but `node .../node_modules/
-# @medusajs/cli/cli.js` fails with MODULE_NOT_FOUND at container start
-# specifically on Railway's remote builder. These print (without ever
-# failing the build) whether the symlink and its target actually exist
-# right after install, so the next Railway build log shows real evidence
-# instead of another guess. Remove once this is root-caused.
-RUN ls -la apps/backend/node_modules/@medusajs/cli/ || echo "DIAG: apps/backend/node_modules/@medusajs/cli listing failed"
-RUN readlink -f apps/backend/node_modules/@medusajs/cli || echo "DIAG: readlink failed"
-RUN find node_modules/.pnpm -maxdepth 1 -iname "@medusajs+cli@*" || echo "DIAG: not found in .pnpm store"
-RUN test -f apps/backend/node_modules/@medusajs/cli/cli.js && echo "DIAG: cli.js exists" || echo "DIAG: cli.js MISSING"
-
 RUN pnpm --filter=@dtc/backend build
 
 ENV NODE_ENV=production
@@ -60,7 +59,9 @@ WORKDIR /repo/apps/backend/.medusa/server
 
 EXPOSE 9000
 
-# Not `node_modules/.bin/medusa` - that's a shell-script wrapper (fails
-# under a plain `node <path>` invocation); this is the actual JS
-# entrypoint it wraps.
-CMD ["node", "../../node_modules/@medusajs/cli/cli.js", "start"]
+# The .bin shell wrapper, not `node <path>/cli.js` directly: the wrapper
+# resolves the real CLI entrypoint itself, so this keeps working
+# regardless of how pnpm happens to lay out the workspace symlinks. It's
+# also the exact mechanism `pnpm --filter=@dtc/backend build` uses above,
+# which works on Railway's builder even when the package symlink doesn't.
+CMD ["../../node_modules/.bin/medusa", "start"]
