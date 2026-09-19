@@ -46,6 +46,12 @@ RUN pnpm install --frozen-lockfile
 
 RUN pnpm --filter=@dtc/backend build
 
+RUN echo "=== AFTER MEDUSA BUILD ===" && \
+    echo "--- backend ---" && \
+    find /repo/apps/backend -maxdepth 4 -type f | sort | head -200 && \
+    echo "--- .medusa ---" && \
+    find /repo -path "*/.medusa/*" -maxdepth 8 -type f | sort | head -200
+
 ENV NODE_ENV=production
 
 WORKDIR /repo
