@@ -8,25 +8,11 @@ WORKDIR /repo
 
 COPY . .
 
-ENV NODE_ENV=development
-
 RUN pnpm install --frozen-lockfile
 
-RUN echo "=== BACKEND PACKAGE ===" && \
-    pnpm --filter=@dtc/backend exec sh -c 'pwd && echo "--- package.json ---" && cat package.json'
-
-RUN echo "=== WORKSPACE PACKAGES ===" && \
-    pnpm -r list --depth -1
-
-RUN echo "=== MEDUSA BUILD ===" && \
-    pnpm --filter=@dtc/backend exec medusa build
-
-RUN echo "=== MEDUSA OUTPUT ===" && \
-    find /repo -type d -name ".medusa" | sort
+RUN pnpm --filter=@dtc/backend build
 
 ENV NODE_ENV=production
-
-WORKDIR /repo
 
 EXPOSE 9000
 
