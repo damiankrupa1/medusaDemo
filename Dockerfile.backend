@@ -12,8 +12,11 @@ ENV NODE_ENV=development
 
 RUN pnpm install --frozen-lockfile
 
-RUN echo "=== BACKEND LOCATION ===" && \
-    pnpm --filter=@dtc/backend exec pwd
+RUN echo "=== BACKEND PACKAGE ===" && \
+    pnpm --filter=@dtc/backend exec sh -c 'pwd && echo "--- package.json ---" && cat package.json'
+
+RUN echo "=== WORKSPACE PACKAGES ===" && \
+    pnpm -r list --depth -1
 
 RUN echo "=== MEDUSA BUILD ===" && \
     pnpm --filter=@dtc/backend exec medusa build
