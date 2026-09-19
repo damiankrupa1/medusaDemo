@@ -44,7 +44,7 @@ ENV NODE_ENV=development
 
 RUN pnpm install --frozen-lockfile
 
-RUN pnpm --filter=@dtc/backend build
+RUN cd /repo/apps/backend && medusa build
 
 RUN echo "=== BACKEND ===" && \
     find /repo/apps/backend -maxdepth 5 -type f | sort | head -300 && \
