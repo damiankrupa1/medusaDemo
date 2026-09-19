@@ -44,6 +44,15 @@ ENV NODE_ENV=development
 
 RUN pnpm install --frozen-lockfile
 
+RUN echo "=== BACKEND LOCATION ===" && \
+    pnpm --filter=@dtc/backend exec pwd
+
+RUN echo "=== MEDUSA BUILD ===" && \
+    pnpm --filter=@dtc/backend exec medusa build
+
+RUN echo "=== MEDUSA OUTPUT ===" && \
+    find /repo -type d -name ".medusa" | sort
+
 RUN cd /repo/apps/backend && medusa build
 
 RUN echo "=== BACKEND ===" && \
