@@ -40,33 +40,16 @@ WORKDIR /repo
 
 COPY . .
 
-# Two env vars that only matter on Railway's builder - a local
-# `docker build` produced a working image without either of them:
-#
-# NODE_ENV=development for the install step: Railway sets
-# NODE_ENV=production in the build environment, which changes what pnpm
-# links into the workspace. devDependencies are needed here regardless,
-# since `medusa build` bundles the Admin dashboard with vite/typescript.
-#
-# NPM_CONFIG_NODE_LINKER=hoisted: pnpm's default layout is a symlink
-# farm - each workspace's node_modules/<pkg> is a relative symlink into
-# the shared node_modules/.pnpm store. On Railway that layout came out
-# incomplete: a build log showed @medusajs/cli present in
-# node_modules/.pnpm but *no* apps/backend/node_modules/@medusajs/cli
-# symlink and no .bin/medusa either, so the container crash-looped on
-# MODULE_NOT_FOUND. "hoisted" makes pnpm write a flat, npm-style
-# node_modules of real directories instead, so there are no symlinks
-# left to go missing.
 ENV NODE_ENV=development
-ENV NPM_CONFIG_NODE_LINKER=hoisted
+
 RUN pnpm install --frozen-lockfile
+
 RUN pnpm --filter=@dtc/backend build
 
-RUN echo "=== MEDUSA BUILD ===" && \
-    find /repo/apps/backend/.medusa/server -maxdepth 2 -type f | head -100
-
 ENV NODE_ENV=production
-WORKDIR /repo/apps/backend
+
+WORKDIR /repo
+
 EXPOSE 9000
 
-CMD ["../../node_modules/.bin/medusa", "start"]
+CMD ["pnpm", "--filter=@dtc/backend", "start"]
