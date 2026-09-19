@@ -62,16 +62,8 @@ ENV NPM_CONFIG_NODE_LINKER=hoisted
 RUN pnpm install --frozen-lockfile
 RUN pnpm --filter=@dtc/backend build
 
-RUN echo "=== BACKEND ===" && \
-    pwd && \
-    ls -la /repo/apps/backend && \
-    echo "=== MEDUSA SERVER ===" && \
-    ls -la /repo/apps/backend/.medusa/server && \
-    echo "=== MEDUSA CONFIG ===" && \
-    ls -la /repo/apps/backend/medusa-config.ts || true && \
-    echo "=== CLI ===" && \
-    ls -la /repo/node_modules/.bin/medusa && \
-    readlink -f /repo/node_modules/.bin/medusa
+RUN echo "=== MEDUSA BUILD ===" && \
+    find /repo/apps/backend/.medusa/server -maxdepth 2 -type f | head -100
 
 ENV NODE_ENV=production
 WORKDIR /repo/apps/backend
