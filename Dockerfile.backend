@@ -1,41 +1,9 @@
 # syntax=docker/dockerfile:1
-#
-# Builds the Medusa backend (apps/backend) out of the pnpm/turbo monorepo
-# for Railway. Only the backend workspace is deployed here - the Nuxt/Next
-# storefront is not part of this image and deploys separately (Vercel).
-#
-# The same image is used for both the API server and the background worker
-# Railway service; which one a container runs is controlled entirely by the
-# WORKER_MODE env var (shared | server | worker), read by medusa-config.ts.
-#
-# Single stage, deliberately. This started as a multi-stage build (a
-# `build` stage running `pnpm install` + `medusa build`, then a leaner
-# `production` stage copying just `.medusa/server` + node_modules across
-# the stage boundary). That approach worked reliably with a local
-# `docker build`, but broke twice on Railway's own remote builder in ways
-# a local build never reproduced:
-#   1. A `COPY --from=build` split across three separate instructions
-#      (node_modules, apps/backend/node_modules, .medusa/server) failed
-#      with "failed to calculate checksum of ref ...: not found" for one
-#      of the paths - reproducible even with NO_CACHE=1 set, so not a
-#      stale/evicted cache issue.
-#   2. Consolidating those into a single `COPY --from=build /repo /repo`
-#      built successfully, but pnpm's node_modules symlinks (each
-#      workspace's node_modules/<pkg> is a *relative* symlink into the
-#      shared node_modules/.pnpm store) didn't survive the copy on
-#      Railway's builder - the container crash-looped with
-#      "Cannot find module '.../node_modules/@medusajs/cli/cli.js'",
-#      even though the exact same image built and ran correctly locally.
-#
-# Two independent failures of the same mechanism (copying a large
-# symlink-heavy directory tree across a build-stage boundary) on the
-# same remote builder is enough signal to stop trying to make that
-# mechanism work and remove it instead: everything happens in one stage,
-# so node_modules is created and used in place, never copied anywhere.
-# Larger image (ships devDependencies and the storefront workspace's own
-# node_modules too) but there is no cross-stage copy left to break.
+
 FROM node:22-slim
+
 RUN corepack enable && corepack prepare pnpm@11.5.0 --activate
+
 WORKDIR /repo
 
 COPY . .
@@ -52,13 +20,6 @@ RUN echo "=== MEDUSA BUILD ===" && \
 
 RUN echo "=== MEDUSA OUTPUT ===" && \
     find /repo -type d -name ".medusa" | sort
-
-RUN cd /repo/apps/backend && medusa build
-
-RUN echo "=== BACKEND ===" && \
-    find /repo/apps/backend -maxdepth 5 -type f | sort | head -300 && \
-    echo "=== MEDUSA DIRECTORIES ===" && \
-    find /repo -type d -name ".medusa" -o -type d -name "server" | head -100
 
 ENV NODE_ENV=production
 
