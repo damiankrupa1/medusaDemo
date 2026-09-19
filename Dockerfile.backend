@@ -40,26 +40,31 @@ WORKDIR /repo
 
 COPY . .
 
-# NODE_ENV is pinned to development *for the install only*. Railway's
-# builder sets NODE_ENV=production in the build environment, and with
-# that set pnpm links the workspace differently: a Railway build log
-# showed @medusajs/cli present in node_modules/.pnpm but with no
-# apps/backend/node_modules/@medusajs/cli symlink created, so the
-# container crash-looped on
-# "Cannot find module '.../node_modules/@medusajs/cli/cli.js'" while the
-# identical image built locally (where NODE_ENV is unset) ran fine.
-# devDependencies are needed here anyway - `medusa build` bundles the
-# Admin dashboard with vite/typescript.
+# Two env vars that only matter on Railway's builder - a local
+# `docker build` produced a working image without either of them:
+#
+# NODE_ENV=development for the install step: Railway sets
+# NODE_ENV=production in the build environment, which changes what pnpm
+# links into the workspace. devDependencies are needed here regardless,
+# since `medusa build` bundles the Admin dashboard with vite/typescript.
+#
+# NPM_CONFIG_NODE_LINKER=hoisted: pnpm's default layout is a symlink
+# farm - each workspace's node_modules/<pkg> is a relative symlink into
+# the shared node_modules/.pnpm store. On Railway that layout came out
+# incomplete: a build log showed @medusajs/cli present in
+# node_modules/.pnpm but *no* apps/backend/node_modules/@medusajs/cli
+# symlink and no .bin/medusa either, so the container crash-looped on
+# MODULE_NOT_FOUND. "hoisted" makes pnpm write a flat, npm-style
+# node_modules of real directories instead, so there are no symlinks
+# left to go missing.
 ENV NODE_ENV=development
+ENV NPM_CONFIG_NODE_LINKER=hoisted
 RUN pnpm install --frozen-lockfile
 RUN pnpm --filter=@dtc/backend build
 
-RUN ls -la /repo/node_modules/.bin/medusa && \
-    readlink -f /repo/node_modules/.bin/medusa && \
-    ls -la /repo/apps/backend/node_modules 2>/dev/null || true
 ENV NODE_ENV=production
 WORKDIR /repo/apps/backend/.medusa/server
 
 EXPOSE 9000
 
-CMD ["../../../node_modules/.bin/medusa", "start"]
+CMD ["../../../../node_modules/.bin/medusa", "start"]
