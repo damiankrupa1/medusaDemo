@@ -35,6 +35,7 @@
     "@medusajs/ui": "4.1.19",
     "@tanstack/react-query": "5.64.2",
     "ioredis": "5.11.1",
+    "medusa-inpost-fulfillment": "^0.5.3",
     "react-i18next": "13.5.0",
     "react-router-dom": "6.30.4",
     "zod": "4.2.0"
