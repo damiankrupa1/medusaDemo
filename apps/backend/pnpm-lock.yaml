@@ -35,13 +35,13 @@ importers:
         version: 2.19.0(@medusajs/framework@2.19.0(@medusajs/cli@2.19.0(@types/node@20.19.43))(@types/node@20.19.43)(ioredis@5.11.1)(vite@5.4.21(@types/node@20.19.43))(zod@4.2.0))
       '@medusajs/framework':
         specifier: 2.19.0
-        version: 2.19.0(@medusajs/cli@2.19.0(@types/node@20.19.43))(@types/node@20.19.43)(zod@4.2.0)
+        version: 2.19.0(@medusajs/cli@2.19.0(@types/node@20.19.43))(@types/node@20.19.43)(ioredis@5.11.1)(vite@5.4.21(@types/node@20.19.43))(zod@4.2.0)
       '@medusajs/medusa':
         specifier: 2.19.0
         version: 2.19.0(41e76aa210e2b41cca7253702e22238f)
       '@medusajs/payment-stripe':
         specifier: 2.19.0
-        version: 2.19.0(@medusajs/framework@2.19.0(@medusajs/cli@2.19.0(@types/node@20.19.43))(@types/node@20.19.43)(zod@4.2.0))
+        version: 2.19.0(@medusajs/framework@2.19.0(@medusajs/cli@2.19.0(@types/node@20.19.43))(@types/node@20.19.43)(ioredis@5.11.1)(vite@5.4.21(@types/node@20.19.43))(zod@4.2.0))
       '@medusajs/ui':
         specifier: 4.1.19
         version: 4.1.19(@types/react-dom@19.0.5(@types/react@19.0.5))(@types/react@19.0.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
@@ -51,6 +51,9 @@ importers:
       ioredis:
         specifier: 5.11.1
         version: 5.11.1
+      medusa-inpost-fulfillment:
+        specifier: ^0.5.3
+        version: 0.5.3(@medusajs/admin-sdk@2.19.0)(@medusajs/framework@2.19.0(@medusajs/cli@2.19.0(@types/node@20.19.43))(@types/node@20.19.43)(ioredis@5.11.1)(vite@5.4.21(@types/node@20.19.43))(zod@4.2.0))(@medusajs/icons@2.19.0(react@18.3.1))(@medusajs/ui@4.1.19(@types/react-dom@19.0.5(@types/react@19.0.5))(@types/react@19.0.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       react-i18next:
         specifier: 13.5.0
         version: 13.5.0(i18next@23.7.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -4770,6 +4773,31 @@ packages:
     resolution: {integrity: sha512-dq+qelQ9akHpcOl/gUVRTxVIOkAJ1wR3QAvb4RsVjS8oVoFjDGTc679wJYmUmknUF5HwMLOgb5O+a3KxfWapPQ==}
     engines: {node: '>= 0.6'}
 
+  medusa-inpost-fulfillment@0.5.3:
+    resolution: {integrity: sha512-NsBNPXYOnk6UD5ntKeQSujdNic6pqqbSEe5qeXSiofu9Mma/pvfX62gMfWAhr62WkkuA1o72+jSXZJ248Li6UA==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@medusajs/admin-sdk': ^2.13.5
+      '@medusajs/framework': ^2.5.0
+      '@medusajs/icons': ^2.13.5
+      '@medusajs/ui': ^4.1.5
+      react: ^18.3.1
+      react-dom: ^18.3.1
+      react-router-dom: ^6.30.3 || ^7.0.0
+    peerDependenciesMeta:
+      '@medusajs/admin-sdk':
+        optional: true
+      '@medusajs/icons':
+        optional: true
+      '@medusajs/ui':
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+      react-router-dom:
+        optional: true
+
   merge-descriptors@1.0.3:
     resolution: {integrity: sha512-gaNvAS7TZ897/rVaZ0nMtAyxNyi/pdbjbAwUpFQpN70GqnVfOiXpeUUMKRBmzXaSQ8DdTX4/0ms62r2K+hE6mQ==}
 
@@ -7784,50 +7812,6 @@ snapshots:
       - vite
       - zod
 
-  '@medusajs/framework@2.19.0(@medusajs/cli@2.19.0(@types/node@20.19.43))(@types/node@20.19.43)(zod@4.2.0)':
-    dependencies:
-      '@aws-sdk/client-dynamodb': 3.1085.0
-      '@jercle/yargonaut': 1.1.5
-      '@medusajs/cli': 2.19.0(@types/node@20.19.43)
-      '@medusajs/deps': 2.19.0(@types/node@20.19.43)
-      '@medusajs/modules-sdk': 2.19.0(@types/node@20.19.43)(express@4.22.2)
-      '@medusajs/orchestration': 2.19.0(@types/node@20.19.43)(express@4.22.2)
-      '@medusajs/telemetry': 2.19.0
-      '@medusajs/types': 2.19.0
-      '@medusajs/utils': 2.19.0(@types/node@20.19.43)(express@4.22.2)
-      '@medusajs/workflows-sdk': 2.19.0(@types/node@20.19.43)(express@4.22.2)
-      '@types/express': 4.17.25
-      chokidar: 4.0.3
-      compression: 1.8.1
-      connect-dynamodb: 3.0.5
-      connect-redis: 5.2.0
-      cookie-parser: 1.4.7
-      cors: 2.8.6
-      express: 4.22.2
-      express-session: 1.19.0
-      glob: 13.0.6
-      http-errors: 2.0.0
-      jsonwebtoken: 9.0.3
-      lodash.memoize: 4.1.2
-      morgan: 1.11.0
-      path-to-regexp: 8.4.2
-      tsconfig-paths: 4.2.0
-      zod-validation-error: 5.0.0(zod@4.2.0)
-    transitivePeerDependencies:
-      - '@types/node'
-      - better-sqlite3
-      - debug
-      - libsql
-      - mariadb
-      - mysql
-      - mysql2
-      - pg-native
-      - pg-query-stream
-      - sqlite3
-      - supports-color
-      - tedious
-      - zod
-
   '@medusajs/fulfillment-manual@2.19.0(@medusajs/framework@2.19.0(@medusajs/cli@2.19.0(@types/node@20.19.43))(@types/node@20.19.43)(ioredis@5.11.1)(vite@5.4.21(@types/node@20.19.43))(zod@4.2.0))':
     dependencies:
       '@medusajs/framework': 2.19.0(@medusajs/cli@2.19.0(@types/node@20.19.43))(@types/node@20.19.43)(ioredis@5.11.1)(vite@5.4.21(@types/node@20.19.43))(zod@4.2.0)
@@ -8071,11 +8055,6 @@ snapshots:
       '@medusajs/framework': 2.19.0(@medusajs/cli@2.19.0(@types/node@20.19.43))(@types/node@20.19.43)(ioredis@5.11.1)(vite@5.4.21(@types/node@20.19.43))(zod@4.2.0)
       stripe: 15.12.0
 
-  '@medusajs/payment-stripe@2.19.0(@medusajs/framework@2.19.0(@medusajs/cli@2.19.0(@types/node@20.19.43))(@types/node@20.19.43)(zod@4.2.0))':
-    dependencies:
-      '@medusajs/framework': 2.19.0(@medusajs/cli@2.19.0(@types/node@20.19.43))(@types/node@20.19.43)(zod@4.2.0)
-      stripe: 15.12.0
-
   '@medusajs/payment@2.19.0(@medusajs/framework@2.19.0(@medusajs/cli@2.19.0(@types/node@20.19.43))(@types/node@20.19.43)(ioredis@5.11.1)(vite@5.4.21(@types/node@20.19.43))(zod@4.2.0))(@types/node@20.19.43)':
     dependencies:
       '@medusajs/framework': 2.19.0(@medusajs/cli@2.19.0(@types/node@20.19.43))(@types/node@20.19.43)(ioredis@5.11.1)(vite@5.4.21(@types/node@20.19.43))(zod@4.2.0)
@@ -8183,10 +8162,6 @@ snapshots:
   '@medusajs/translation@2.19.0(@medusajs/framework@2.19.0(@medusajs/cli@2.19.0(@types/node@20.19.43))(@types/node@20.19.43)(ioredis@5.11.1)(vite@5.4.21(@types/node@20.19.43))(zod@4.2.0))':
     dependencies:
       '@medusajs/framework': 2.19.0(@medusajs/cli@2.19.0(@types/node@20.19.43))(@types/node@20.19.43)(ioredis@5.11.1)(vite@5.4.21(@types/node@20.19.43))(zod@4.2.0)
-
-  '@medusajs/types@2.19.0':
-    dependencies:
-      bignumber.js: 9.3.1
 
   '@medusajs/types@2.19.0(ioredis@5.11.1)(vite@5.4.21(@types/node@20.19.43))':
     dependencies:
@@ -11928,6 +11903,17 @@ snapshots:
   meant@1.0.3: {}
 
   media-typer@0.3.0: {}
+
+  medusa-inpost-fulfillment@0.5.3(@medusajs/admin-sdk@2.19.0)(@medusajs/framework@2.19.0(@medusajs/cli@2.19.0(@types/node@20.19.43))(@types/node@20.19.43)(ioredis@5.11.1)(vite@5.4.21(@types/node@20.19.43))(zod@4.2.0))(@medusajs/icons@2.19.0(react@18.3.1))(@medusajs/ui@4.1.19(@types/react-dom@19.0.5(@types/react@19.0.5))(@types/react@19.0.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1):
+    dependencies:
+      '@medusajs/framework': 2.19.0(@medusajs/cli@2.19.0(@types/node@20.19.43))(@types/node@20.19.43)(ioredis@5.11.1)(vite@5.4.21(@types/node@20.19.43))(zod@4.2.0)
+    optionalDependencies:
+      '@medusajs/admin-sdk': 2.19.0
+      '@medusajs/icons': 2.19.0(react@18.3.1)
+      '@medusajs/ui': 4.1.19(@types/react-dom@19.0.5(@types/react@19.0.5))(@types/react@19.0.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+      react-router-dom: 6.30.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
   merge-descriptors@1.0.3: {}
 
