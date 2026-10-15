@@ -34,15 +34,15 @@ export default async function add_polish_translations({
 
   const handles = Object.keys(productTranslations);
 
-  const { data: products } = await query.graph({
+  const { data: products } = (await query.graph({
     entity: "product",
     fields: ["id", "handle"],
     filters: { handle: handles },
-  });
+  })) as { data: { id: string; handle: string }[] };
 
   if (!products.length) {
     logger.warn(
-      "No matching products found - run the initial data seed first."
+      "No matching products found - run the initial data seed first.",
     );
     return;
   }
@@ -57,18 +57,18 @@ export default async function add_polish_translations({
     },
   });
   const alreadyTranslated = new Set(
-    existingTranslations.map((translation) => translation.reference_id)
+    existingTranslations.map((translation) => translation.reference_id),
   );
 
   const productsToTranslate = products.filter(
-    (product) => !alreadyTranslated.has(product.id)
+    (product) => !alreadyTranslated.has(product.id),
   );
 
   if (!productsToTranslate.length) {
     logger.info("Polish translations already exist for all matching products.");
   } else {
     logger.info(
-      `Creating Polish translations for ${productsToTranslate.length} product(s)...`
+      `Creating Polish translations for ${productsToTranslate.length} product(s)...`,
     );
 
     await translationModuleService.createTranslations(
@@ -77,11 +77,13 @@ export default async function add_polish_translations({
         reference_id: product.id,
         locale_code: PL_LOCALE,
         translations: productTranslations[product.handle],
-      }))
+      })),
     );
   }
 
-  const { data: [store] } = await query.graph({
+  const {
+    data: [store],
+  } = await query.graph({
     entity: "store",
     fields: ["id", "supported_locales.locale_code"],
     pagination: { take: 1 },

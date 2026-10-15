@@ -1,9 +1,9 @@
-import { loadEnv, defineConfig } from '@medusajs/framework/utils'
-import { Modules } from '@medusajs/framework/utils'
+import { loadEnv, defineConfig } from "@medusajs/framework/utils";
+import { Modules } from "@medusajs/framework/utils";
 
-loadEnv(process.env.NODE_ENV || 'development', process.cwd())
+loadEnv(process.env.NODE_ENV || "development", process.cwd());
 
-const isProduction = process.env.NODE_ENV === "production"
+const isProduction = process.env.NODE_ENV === "production";
 
 /**
  * JWT_SECRET/COOKIE_SECRET must never fall back to a predictable value in
@@ -12,16 +12,16 @@ const isProduction = process.env.NODE_ENV === "production"
  */
 function requireSecret(value: string | undefined, name: string): string {
   if (value) {
-    return value
+    return value;
   }
 
   if (isProduction) {
     throw new Error(
-      `${name} is not set. Refusing to start in production with an insecure default secret.`
-    )
+      `${name} is not set. Refusing to start in production with an insecure default secret.`,
+    );
   }
 
-  return "supersecret"
+  return "supersecret";
 }
 
 /**
@@ -44,7 +44,7 @@ const s3Config = {
     process.env.S3_FORCE_PATH_STYLE === "true"
       ? { forcePathStyle: true }
       : undefined,
-}
+};
 
 /**
  * S3-compatible storage (Railway Bucket, AWS S3, Cloudflare R2, MinIO, ...)
@@ -54,16 +54,26 @@ const s3Config = {
  */
 const hasS3Config = Boolean(
   s3Config.file_url &&
-    s3Config.region &&
-    s3Config.access_key_id &&
-    s3Config.secret_access_key &&
-    s3Config.bucket
-)
+  s3Config.region &&
+  s3Config.access_key_id &&
+  s3Config.secret_access_key &&
+  s3Config.bucket,
+);
+
+const inpostOptions = {
+  apiToken: process.env.INPOST_API_TOKEN,
+  organizationId: process.env.INPOST_ORGANIZATION_ID,
+
+  sandbox: true,
+
+  defaultParcelTemplate: "small",
+  defaultLabelFormat: "pdf",
+  returnTokenTtlMinutes: 60,
+};
 
 module.exports = defineConfig({
   admin: {
-    disable: process.env.ADMIN_DISABLED === "true" ||
-      false,
+    disable: process.env.ADMIN_DISABLED === "true" || false,
   },
   featureFlags: {
     translation: true,
@@ -71,17 +81,38 @@ module.exports = defineConfig({
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
     redisUrl: process.env.REDIS_URL,
-    workerMode: (process.env.WORKER_MODE as "shared" | "worker" | "server" | undefined) || "shared",
+    workerMode:
+      (process.env.WORKER_MODE as "shared" | "worker" | "server" | undefined) ||
+      "shared",
     http: {
       storeCors: process.env.STORE_CORS!,
       adminCors: process.env.ADMIN_CORS!,
       authCors: process.env.AUTH_CORS!,
       jwtSecret: requireSecret(process.env.JWT_SECRET, "JWT_SECRET"),
       cookieSecret: requireSecret(process.env.COOKIE_SECRET, "COOKIE_SECRET"),
-    }
+    },
   },
-
+  plugins: [
+    {
+      resolve: "medusa-inpost-fulfillment",
+      options: inpostOptions,
+    },
+  ],
   modules: {
+    [Modules.PAYMENT]: {
+      resolve: "@medusajs/medusa/payment",
+      options: {
+        providers: [
+          {
+            resolve: "@medusajs/medusa/payment-stripe",
+            id: "stripe",
+            options: {
+              apiKey: process.env.STRIPE_API_KEY,
+            },
+          },
+        ],
+      },
+    },
     [Modules.EVENT_BUS]: {
       resolve: "@medusajs/event-bus-redis",
       options: {
@@ -110,5 +141,21 @@ module.exports = defineConfig({
           },
         }
       : {}),
+    [Modules.FULFILLMENT]: {
+      resolve: "@medusajs/medusa/fulfillment",
+      options: {
+        providers: [
+          {
+            resolve: "medusa-inpost-fulfillment/providers/inpost",
+            id: "inpost",
+            options: inpostOptions,
+          },
+          {
+            resolve: "@medusajs/medusa/fulfillment-manual",
+            id: "manual",
+          },
+        ],
+      },
+    },
   },
-})
+});
