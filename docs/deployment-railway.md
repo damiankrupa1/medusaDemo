@@ -7,25 +7,29 @@ separately to Vercel and is out of scope here.
 ## 1. Architecture
 
 ```
-                 ┌───────────────────────────┐
-  Vercel         │        RAILWAY            │
-  storefront ───▶│  Medusa Server (API/Admin)│
-  (HTTPS)        │        │                  │
-                 │        ├─▶ PostgreSQL      │
-                 │        ├─▶ Redis           │
-                 │        └─▶ S3-compatible   │
-                 │            storage         │
-                 │  Medusa Worker             │
-                 │  (same image, WORKER_MODE) │
-                 │        ├─▶ PostgreSQL      │
-                 │        └─▶ Redis           │
-                 └───────────────────────────┘
+                 ┌──────────────────────────────────┐
+  Vercel         │             RAILWAY              │
+  storefront ───▶│  Medusa Server (API/Admin)       │
+  (HTTPS)        │        │                         │
+                 │        ├─▶ PostgreSQL             │
+                 │        ├─▶ Redis                  │
+                 │        └─▶ Bucket (private) ◀──┐  │
+                 │  Medusa Worker                 │  │
+                 │  (same image, WORKER_MODE)     │  │
+                 │        ├─▶ PostgreSQL           │  │
+                 │        ├─▶ Redis                │  │
+                 │        └─▶ Bucket (private)     │  │
+  browsers ─────▶│  Bucket proxy (Function, GET) ─┘  │
+  (images)       └──────────────────────────────────┘
 ```
 
 - **Medusa Server** and **Medusa Worker** are two Railway services built from
   the *same* image (`Dockerfile.backend`). Which mode a container runs in is
   controlled entirely by the `WORKER_MODE` env var - no separate codebase or
   build.
+- **Bucket proxy** is a Railway Function (`railway/functions/bucket-proxy.ts`)
+  that serves uploaded images read-only, because a Railway Bucket cannot be
+  made public - see [S3 storage](#5-s3-compatible-storage).
 - Meilisearch, Stripe and Resend are **not** part of this setup - see
   [Remaining / not implemented](#remaining--not-implemented).
 
@@ -35,7 +39,8 @@ separately to Vercel and is out of scope here.
 |---|---|---|
 | PostgreSQL | Primary database | No (internal only) |
 | Redis | Event bus, session store | No (internal only) |
-| S3-compatible storage | Product/variant media | Its own (bucket URL) |
+| Bucket | Product/variant media | No (private, cannot be made public) |
+| Bucket proxy (Function) | Public, read-only access to bucket files | Yes (ideally a custom domain) |
 | Medusa Server | API + Admin dashboard | Yes |
 | Medusa Worker | Background jobs/subscribers | No |
 
@@ -43,9 +48,10 @@ Railway's own **PostgreSQL** and **Redis** plugins work as-is - the backend
 only ever talks to them through `DATABASE_URL` / `REDIS_URL`, never
 hardcoded host/port/user/password.
 
-For S3-compatible storage, use Railway's **Bucket** offering, or point the
-same env vars at AWS S3 / Cloudflare R2 / any S3-compatible provider - see
-[S3 storage](#5-s3-compatible-storage).
+For S3-compatible storage, use Railway's **Bucket** offering together with
+the bucket proxy, or point the same env vars at AWS S3 / Cloudflare R2 / any
+S3-compatible provider whose bucket can be publicly readable (no proxy
+needed then) - see [S3 storage](#5-s3-compatible-storage).
 
 ## 3. Environment variables
 
@@ -92,23 +98,26 @@ Local dev / a single all-in-one deployment can leave this at the default
 ### S3 (Server + Worker)
 | Var | Notes |
 |---|---|
-| `S3_ENDPOINT` | Omit for real AWS S3; required for Railway Bucket/R2/MinIO |
-| `S3_REGION` | e.g. `auto` for R2, a real AWS region for S3 |
-| `S3_ACCESS_KEY_ID` | |
-| `S3_SECRET_ACCESS_KEY` | |
-| `S3_BUCKET` | |
-| `S3_FILE_URL` | The **public** base URL files are served from - see [Storage security](#8-storage-security--testing-checklist) |
-| `S3_FORCE_PATH_STYLE` | `true` for Railway Bucket/R2/MinIO, unset for real AWS S3 |
+| `S3_FILE_URL` | **Required.** The **public** base URL files are served from. Railway Bucket: the bucket proxy's public URL. Public bucket elsewhere: its public URL. See [Storage security](#8-storage-security--testing-checklist) |
+| `S3_ACCESS_KEY_ID` | **Required.** Railway Bucket: `${{<bucket>.ACCESS_KEY_ID}}` |
+| `S3_SECRET_ACCESS_KEY` | **Required.** Railway Bucket: `${{<bucket>.SECRET_ACCESS_KEY}}` |
+| `S3_BUCKET` | **Required.** Railway Bucket: `${{<bucket>.BUCKET}}` (not `RAILWAY_BUCKET_NAME`) |
+| `S3_ENDPOINT` | Omit for real AWS S3; required for Railway Bucket (`${{<bucket>.ENDPOINT}}`), R2, MinIO |
+| `S3_REGION` | Optional, defaults to `us-east-1`. `auto` for Railway Bucket (`${{<bucket>.REGION}}`) and R2 |
+| `S3_FORCE_PATH_STYLE` | `true` only for MinIO and for Railway buckets whose **Credentials** tab asks for path-style URLs (older buckets). Leave unset for new Railway buckets, R2 and AWS S3 (virtual-hosted style) |
+| `S3_ACL` | Leave unset: the ACL header is then omitted, which Railway Bucket, R2 and new AWS buckets require (they reject ACLs). Set `public-read` only for legacy ACL-based buckets |
 
-Leaving all of these unset makes Medusa fall back to its default local-disk
-file provider - fine for a quick test, **not** fine for production on
-Railway, since the container filesystem is ephemeral and wiped on every
-redeploy.
+S3 is enabled only when all four **required** vars are set. If only some
+`S3_*` vars are set, the backend logs `S3 file storage is only partially
+configured - missing: ...` on boot and falls back to the local-disk file
+provider - fine for a quick test, **not** fine for production on Railway,
+since the container filesystem is ephemeral and wiped on every redeploy.
 
 ### Medusa / misc
 | Var | Notes |
 |---|---|
 | `PORT` | Set automatically by Railway - `medusa start` already reads it, no action needed |
+| `BACKEND_PUBLIC_URL` | Optional. Public URL of the backend, used for file URLs only when S3 is **not** configured (local-disk fallback). Defaults to `https://$RAILWAY_PUBLIC_DOMAIN` on Railway, `http://localhost:9000` elsewhere |
 | `ADMIN_DISABLED` | Leave unset/`false` unless you've confirmed the Admin build is genuinely too expensive for your Railway plan - see [Admin](#7-admin-dashboard) |
 
 ## 4. Redis usage in this project
@@ -127,21 +136,86 @@ Confirmed by reading the actual config, not assumed:
 
 ## 5. S3-compatible storage
 
-`apps/backend/medusa-config.ts` registers `Modules.FILE` with the
-`@medusajs/file-s3` provider **only when all of `S3_FILE_URL`, `S3_REGION`,
-`S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_BUCKET` are set** - otherwise
-it's left unconfigured and Medusa uses its built-in local-disk provider.
+The setup follows the
+[medusajs-2.0-for-railway-boilerplate](https://github.com/rpuls/medusajs-2.0-for-railway-boilerplate):
+Medusa's stock `@medusajs/file-s3` provider, configured from `S3_*` env vars,
+plus a read-only bucket proxy for Railway's private buckets.
+
+`apps/backend/medusa-config.ts` registers `Modules.FILE` with the provider
+chosen by `getFileProvider()` (`apps/backend/src/config/file-storage.ts`):
+
+- the `@medusajs/file-s3` provider when `S3_FILE_URL`, `S3_ACCESS_KEY_ID`,
+  `S3_SECRET_ACCESS_KEY` and `S3_BUCKET` are all set, with `acl: false`
+  unless `S3_ACL` is set (no ACL header on uploads), region defaulting to
+  `us-east-1`, virtual-hosted addressing unless `S3_FORCE_PATH_STYLE` is
+  true, and 24h presigned download URLs (e.g. product exports);
+- otherwise the `@medusajs/file-local` provider, serving files from
+  `BACKEND_PUBLIC_URL`/`https://$RAILWAY_PUBLIC_DOMAIN` + `/static` rather
+  than its own `http://localhost:9000` default.
 
 The provider's actual input option names are **snake_case**
 (`file_url`, `access_key_id`, ...) - verified against
 `node_modules/@medusajs/file-s3/dist/services/s3-file.js` rather than
 assumed from the `.d.ts`, which documents a different, internal shape.
-`S3_FORCE_PATH_STYLE=true` maps to the client's `forcePathStyle` option,
-required for Railway Bucket, Cloudflare R2 and MinIO (not for real AWS S3).
 
 Because storage is entirely env-var driven, switching between Railway
 Bucket, AWS S3, Cloudflare R2 or a self-hosted MinIO never requires a code
 change.
+
+### Railway Bucket + bucket proxy
+
+Railway Buckets are private ("Public buckets are currently not supported"),
+so a browser cannot load an image straight from one. Medusa stores
+`S3_FILE_URL/<key>` as each image's URL, and `S3_FILE_URL` points at the
+**bucket proxy** - `railway/functions/bucket-proxy.ts`, a single-file
+Railway Function (Bun runtime, no dependencies) that reads from the bucket
+with its credentials and streams the file back.
+
+The proxy only answers `GET`/`HEAD` for a single object key: anything else
+is `405`, a missing key or a path with empty/`.`/`..` segments is `404`, and
+storage errors are `502` (logged as `bucket-proxy: reading "<key>" failed`).
+Responses carry `Cache-Control: public, max-age=31536000, immutable` (every
+upload gets a unique ULID-suffixed key), plus `X-Content-Type-Options:
+nosniff` and a sandboxing `Content-Security-Policy`.
+
+Setup:
+
+1. Add a **Bucket** to the Railway project. Note on its **Credentials** tab
+   whether it uses virtual-hosted (new buckets) or path-style URLs.
+2. Add a **Function** service (e.g. `bucket-proxy`), paste the contents of
+   `railway/functions/bucket-proxy.ts` into its **Source Code** tab and
+   deploy it (Ctrl+S, then Shift+Enter).
+3. On the Function, set (replace `<bucket>` with the bucket service's name):
+   ```
+   S3_ENDPOINT=${{<bucket>.ENDPOINT}}
+   S3_REGION=${{<bucket>.REGION}}
+   S3_BUCKET=${{<bucket>.BUCKET}}
+   S3_ACCESS_KEY_ID=${{<bucket>.ACCESS_KEY_ID}}
+   S3_SECRET_ACCESS_KEY=${{<bucket>.SECRET_ACCESS_KEY}}
+   # only if the Credentials tab asks for path-style URLs:
+   # S3_FORCE_PATH_STYLE=true
+   ```
+4. Give the Function a public domain - preferably a **custom domain**
+   (e.g. `media.example.com`). Medusa stores the full URL of every image in
+   the database, so changing `S3_FILE_URL` later does **not** update images
+   that are already uploaded.
+5. On **both** Server and Worker set the same `S3_*` references plus
+   `S3_FILE_URL=https://<proxy domain>`, then redeploy.
+6. Run the [storage checklist](#8-storage-security--testing-checklist).
+
+Cost: Railway doesn't charge for bucket egress, but it does charge for
+service egress, so every image served through the proxy counts as the
+Function's egress. Since responses are immutable, putting a CDN in front of
+the proxy domain (e.g. Cloudflare) removes most of that traffic.
+
+To try the proxy locally against the MinIO from `docker-compose.yml` (needs
+Bun 1.2+):
+
+```bash
+PORT=8787 S3_ENDPOINT=http://localhost:9002 S3_BUCKET=medusa-media \
+S3_ACCESS_KEY_ID=minioadmin S3_SECRET_ACCESS_KEY=minioadmin \
+S3_FORCE_PATH_STYLE=true bun run railway/functions/bucket-proxy.ts
+```
 
 ## 6. Database migrations
 
@@ -252,9 +326,16 @@ actually publicly reachable at the URL Medusa stores in the database:
    no admin session).
 4. Confirm it returns `HTTP 200` with the image, not `403`/`404`.
 
-If step 4 fails, the bucket/object ACL is not actually public - fix the
-bucket's public-read policy (or object ACL) for the provider you're using;
-`S3_FILE_URL` must match whatever public base URL that policy serves from.
+If step 4 fails:
+
+- **Railway Bucket:** the URL must start with the bucket proxy's domain
+  (`S3_FILE_URL`). `404` means the key isn't in the bucket the proxy reads
+  (compare the proxy's `S3_BUCKET`/`S3_ENDPOINT` with the backend's), `502`
+  means the proxy can't reach the bucket - check the Function's logs and
+  variables.
+- **Public bucket elsewhere:** the bucket isn't actually publicly readable -
+  fix its public-read bucket policy; `S3_FILE_URL` must match whatever public
+  base URL that policy serves from.
 
 ## 9. Health checks
 
@@ -283,7 +364,10 @@ storefront).
 - [ ] `DATABASE_URL` / `REDIS_URL` point at the Railway PostgreSQL/Redis
       plugins
 - [ ] `STORE_CORS` / `ADMIN_CORS` / `AUTH_CORS` list real domains, no `*`
-- [ ] All `S3_*` vars set on **both** Server and Worker
+- [ ] All required `S3_*` vars set on **both** Server and Worker, and no
+      "S3 file storage is only partially configured" warning in their logs
+- [ ] Bucket proxy Function deployed with the bucket's `S3_*` references,
+      reachable on its (custom) domain, and `S3_FILE_URL` points at it
 - [ ] `WORKER_MODE=server` on the Server service, `WORKER_MODE=worker` on
       the Worker service
 - [ ] Server service's Railway config path is `railway.json`
@@ -330,8 +414,11 @@ non-production environment before you need it for real.
 |---|---|---|
 | Deploy succeeds, `/health` is 200, but the app doesn't actually work | `/health` doesn't check anything - use `/health/ready` | `GET /health/ready`, inspect the `checks` object |
 | `medusa-config.ts` throws on boot in production | `JWT_SECRET`/`COOKIE_SECRET` unset | Set both env vars |
-| Uploaded images 404 from the storefront | Bucket isn't public-read, or `S3_FILE_URL` doesn't match the bucket's real public URL | Run the [storage security checklist](#8-storage-security--testing-checklist) |
-| `ETIMEDOUT`/`ECONNREFUSED` to S3-compatible storage | `S3_FORCE_PATH_STYLE` missing for a non-AWS provider | Set `S3_FORCE_PATH_STYLE=true` for Railway Bucket/R2/MinIO |
+| Uploaded images 403/404 from the storefront | Railway Bucket served directly instead of through the proxy, or a public bucket without a public-read policy, or `S3_FILE_URL` not matching where files are served | Run the [storage security checklist](#8-storage-security--testing-checklist) |
+| Image upload fails with `AccessControlListNotSupported` / "bucket does not allow ACLs" | `S3_ACL` is set for a provider without ACL support | Unset `S3_ACL` |
+| `ETIMEDOUT`/`ECONNREFUSED`/`NoSuchBucket` to S3-compatible storage | Wrong addressing style for the provider | Railway: follow the bucket's **Credentials** tab (`S3_FORCE_PATH_STYLE=true` only for path-style buckets); MinIO: `true`; R2/AWS: unset |
+| Images uploaded fine before, disappeared after a redeploy | S3 not actually enabled - files went to the ephemeral local disk | Check the `S3_*` vars on the service; a partial set logs "S3 file storage is only partially configured - missing: ..." on boot |
+| Bucket proxy returns `502` | Proxy can't read the bucket (wrong credentials/endpoint/addressing style) | Function logs (`bucket-proxy: reading ... failed`) and its `S3_*` variables |
 | CORS errors from the storefront | Storefront's real Vercel domain isn't in `STORE_CORS`/`AUTH_CORS` | Update the CORS env vars, redeploy |
 | Worker service never processes anything | `WORKER_MODE` not set to `worker` on that service | Check the Worker service's env vars |
 | Migrations didn't run | `preDeployCommand` only exists on the Server service's `railway.json`, not the Worker's | Confirm the Server service is using `railway.json`, and that its deploy log shows the `medusa db:migrate` step |
