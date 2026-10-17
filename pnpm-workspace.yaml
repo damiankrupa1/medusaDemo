@@ -1,6 +1,7 @@
 packages:
   - "apps/*"
   - "packages/*"
+  - "railway/functions"
 
 allowBuilds:
   '@medusajs/telemetry': true
