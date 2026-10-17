@@ -1,0 +1,12 @@
+{
+  "localizedSlugs": {
+    "title": "Slugi językowe",
+    "empty": "Ten produkt nie ma jeszcze slugów językowych.",
+    "noLocales": "Sklep nie ma jeszcze skonfigurowanych języków.",
+    "placeholder": "np. koszulka-meska",
+    "toast": {
+      "updated": "Slugi językowe zostały zaktualizowane",
+      "saveFailed": "Nie udało się zapisać"
+    }
+  }
+}
