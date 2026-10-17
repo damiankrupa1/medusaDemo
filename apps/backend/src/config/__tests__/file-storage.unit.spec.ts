@@ -60,6 +60,15 @@ describe("getFileProvider", () => {
     })
   })
 
+  it("strips trailing slashes from S3_FILE_URL", () => {
+    const { options } = getFileProvider({
+      ...s3Env,
+      S3_FILE_URL: "https://files.example.com//",
+    })
+
+    expect(options).toMatchObject({ file_url: "https://files.example.com" })
+  })
+
   it("uses local storage on localhost when S3 is not configured", () => {
     expect(getFileProvider({})).toEqual({
       resolve: "@medusajs/medusa/file-local",
