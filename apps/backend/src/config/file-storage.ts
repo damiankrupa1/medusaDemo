@@ -31,7 +31,9 @@ function getBackendUrl(env: NodeJS.ProcessEnv): string {
  */
 function getS3Options(env: NodeJS.ProcessEnv) {
   return {
-    file_url: env.S3_FILE_URL,
+    // file-s3 builds URLs as `${file_url}/${key}` - a trailing slash would
+    // produce `//key`, which the bucket proxy rejects.
+    file_url: env.S3_FILE_URL?.replace(/\/+$/, ""),
     access_key_id: env.S3_ACCESS_KEY_ID,
     secret_access_key: env.S3_SECRET_ACCESS_KEY,
     region: env.S3_REGION || "us-east-1",
