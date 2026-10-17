@@ -1,0 +1,12 @@
+{
+  "localizedSlugs": {
+    "title": "Localized Slugs",
+    "empty": "No localized slugs set for this product yet.",
+    "noLocales": "No supported locales are configured for the store yet.",
+    "placeholder": "e.g. koszulka-meska",
+    "toast": {
+      "updated": "Localized slugs updated",
+      "saveFailed": "Failed to save"
+    }
+  }
+}

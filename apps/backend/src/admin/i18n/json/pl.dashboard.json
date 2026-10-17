@@ -1,0 +1,765 @@
+{
+  "general": {
+    "fullList": "Wszystkie",
+    "original": "Oryginał",
+    "selectAll": "Zaznacz wszystko",
+    "unselectAll": "Odznacz wszystko",
+    "remaining": "Pozostało",
+    "rank": "Pozycja",
+    "values_one": "{{count}} wartość",
+    "values_few": "{{count}} wartości",
+    "values_many": "{{count}} wartości",
+    "values_other": "{{count}} wartości",
+    "items_few": "{{count}} przedmioty",
+    "items_many": "{{count}} przedmiotów",
+    "noRecordsMessageFiltered": "Brak rekordów pasujących do filtrów",
+    "quantityPrice": "Cena zależna od ilości",
+    "exclusive": "Tylko dla produktu",
+    "global": "Globalna"
+  },
+  "actions": {
+    "saveChanges": "Zapisz zmiany",
+    "saveAndClose": "Zapisz i zamknij",
+    "editVariantImages": "Edytuj zdjęcia wariantu",
+    "editImages": "Edytuj zdjęcia",
+    "show": "Pokaż",
+    "manage": "Zarządzaj",
+    "goToProductOption": "Przejdź do opcji produktu"
+  },
+  "dataGrid": {
+    "errors": {
+      "count_few": "{{count}} błędy",
+      "count_many": "{{count}} błędów"
+    }
+  },
+  "layout": {
+    "customizeTopbar": "Dostosuj górny pasek",
+    "customizeSidebar": "Dostosuj pasek boczny",
+    "customizeSettingsSidebar": "Dostosuj pasek boczny ustawień",
+    "customizePage": "Dostosuj stronę",
+    "customizeLayout": "Dostosuj układ",
+    "viewingPersonalLayout": "Widzisz swój osobisty układ",
+    "viewingSystemLayout": "Widzisz układ systemowy",
+    "personalView": "Osobisty",
+    "defaultView": "Domyślny",
+    "empty": "Pusto",
+    "dropToSectionEnd": "Upuść tutaj, aby przenieść na koniec",
+    "dragToReorder": "Przeciągnij, aby zmienić kolejność",
+    "saveForEveryone": "Zapisz dla wszystkich",
+    "saveForEveryoneTitle": "Zapisz układ dla wszystkich",
+    "saveForEveryoneDescription": "To zaktualizuje domyślny układ tej strony dla wszystkich użytkowników, którzy nie dostosowali go samodzielnie. Czy na pewno?",
+    "saveSuccess": "Układ został zapisany"
+  },
+  "filters": {
+    "columnsLabel": "Kolumny",
+    "collapse": {
+      "all": "Zwiń wszystko"
+    }
+  },
+  "products": {
+    "create": {
+      "variants": {
+        "selectValuesHint": "Wybierz, których wartości użyć dla każdej opcji"
+      }
+    },
+    "media": {
+      "manageImageVariants": "Zarządzaj powiązanymi wariantami",
+      "fileTooLarge": "Co najmniej jeden plik przekracza maksymalny rozmiar {{size}}: {{name}}",
+      "variantImages": "Zdjęcia wariantu",
+      "showAvailableImages": "Pokaż dostępne zdjęcia",
+      "availableImages": "Wybierz zdjęcia",
+      "selectToAdd": "Dodaj zdjęcia produktu do wariantu. Aby dodać nowe zdjęcia, najpierw dodaj je do produktu.",
+      "removeSelected": "Usuń zaznaczone"
+    },
+    "variantMedia": {
+      "label": "Media wariantu",
+      "manageVariants": "Zarządzaj wariantami",
+      "addToMultipleVariants": "Dodaj do wielu wariantów",
+      "manageVariantsDescription": "Zarządzaj wariantami powiązanymi ze zdjęciem",
+      "successToast": "Warianty zdjęcia zostały zaktualizowane.",
+      "emptyState": {
+        "header": "Brak mediów",
+        "description": "Dodaj media do wariantu, aby zaprezentować go w swoim sklepie.",
+        "action": "Dodaj media"
+      }
+    },
+    "columns": {
+      "product_display": "Produkt",
+      "variants_count": "Warianty",
+      "sales_channels_display": "Kanały sprzedaży",
+      "collection": "Kolekcja",
+      "status": "Status",
+      "thumbnail": "Miniatura",
+      "title": "Tytuł",
+      "handle": "Uchwyt",
+      "created_at": "Utworzono",
+      "updated_at": "Zaktualizowano"
+    },
+    "options": {
+      "manage": {
+        "header": "Zarządzaj opcjami produktu",
+        "description": "Powiąż opcje z tym produktem lub usuń ich powiązanie.",
+        "label": "Opcje produktu",
+        "hint": "Wybierz, które opcje mają być powiązane z tym produktem.",
+        "placeholder": "Wybierz opcje",
+        "error": {
+          "noValues": "Wybierz co najmniej jedną wartość dla dodanych opcji."
+        }
+      }
+    }
+  },
+  "collections": {
+    "list": {
+      "empty": {
+        "heading": "Brak kolekcji",
+        "description": "Nie ma kolekcji do wyświetlenia."
+      },
+      "filtered": {
+        "heading": "Brak wyników",
+        "description": "Żadna kolekcja nie pasuje do bieżących kryteriów filtrowania."
+      }
+    }
+  },
+  "productOptions": {
+    "domain": "Opcje",
+    "subtitle": "Zarządzaj opcjami produktów i ich wartościami.",
+    "values": {
+      "header": "Wartości",
+      "list": {
+        "noRecords": "Ta opcja nie ma żadnych wartości."
+      },
+      "delete": {
+        "confirmation": "Zamierzasz usunąć wartość opcji „{{value}}”. Ta akcja nie może zostać cofnięta.",
+        "successToast": "Wartość opcji została usunięta."
+      }
+    },
+    "products": {
+      "list": {
+        "noRecords": "Żaden produkt nie ma tej opcji."
+      }
+    },
+    "create": {
+      "header": "Utwórz opcję produktu",
+      "hint": "Utwórz nową opcję produktu i zarządzaj jej wartościami.",
+      "successToast": "Opcja produktu „{{title}}” została utworzona.",
+      "tabs": {
+        "details": "Szczegóły",
+        "organize": "Ustal kolejność"
+      }
+    },
+    "manage": {
+      "exclusiveOption": "Opcja tylko dla tego produktu"
+    },
+    "edit": {
+      "header": "Edytuj opcję produktu",
+      "description": "Edytuj opcję produktu, aby zaktualizować jej szczegóły i powiązane wartości.",
+      "successToast": "Opcja produktu „{{title}}” została zaktualizowana."
+    },
+    "delete": {
+      "confirmation": "Zamierzasz usunąć opcję produktu „{{title}}”. Ta akcja nie może zostać cofnięta.",
+      "successToast": "Opcja produktu została usunięta."
+    },
+    "fields": {
+      "title": {
+        "label": "Tytuł",
+        "placeholder": "Rozmiar"
+      },
+      "values": {
+        "label": "Wartości",
+        "placeholder": "S, M, L"
+      }
+    }
+  },
+  "inventory": {
+    "export": {
+      "header": "Eksportuj listę stanów magazynowych",
+      "description": "Wyeksportuj listę stanów magazynowych do pliku CSV.",
+      "success": {
+        "title": "Przetwarzamy Twój eksport",
+        "description": "Eksport danych może zająć kilka minut. Powiadomimy Cię, gdy będzie gotowy."
+      },
+      "filters": {
+        "title": "Filtry",
+        "description": "Zastosuj filtry w podglądzie tabeli, aby dostosować ten widok"
+      }
+    },
+    "levelDeleted": "Stan magazynowy w lokalizacji został usunięty."
+  },
+  "customers": {
+    "list": {
+      "empty": {
+        "heading": "Brak klientów",
+        "description": "Nie ma klientów do wyświetlenia."
+      },
+      "filtered": {
+        "heading": "Brak wyników",
+        "description": "Żaden klient nie pasuje do bieżących kryteriów filtrowania."
+      }
+    }
+  },
+  "orders": {
+    "export": {
+      "header": "Eksportuj listę zamówień",
+      "description": "Wyeksportuj listę zamówień do pliku CSV.",
+      "success": {
+        "title": "Eksport rozpoczęty",
+        "description": "Powiadomimy Cię, gdy eksport będzie gotowy."
+      },
+      "filters": {
+        "title": "Filtry",
+        "description": "Do eksportu zostaną zastosowane następujące filtry."
+      }
+    },
+    "transfer": {
+      "guestSuccess": "Zamówienie przeniesiono na klienta-gościa: {{email}}.",
+      "ownerType": "Typ konta",
+      "registered": "Zarejestrowany",
+      "registeredDescription": "Przeniesienie na zarejestrowanego klienta, który musi zaakceptować prośbę.",
+      "guest": "Gość",
+      "guestDescription": "Przeniesienie na klienta-gościa przez e-mail. Stosowane natychmiast.",
+      "newGuestOwner": "E-mail nowego właściciela",
+      "newGuestOwnerDescription": "E-mail klienta-gościa, na którego zostanie przeniesione to zamówienie. Jeśli taki klient nie istnieje, zostanie utworzony."
+    },
+    "payment": {
+      "pendingAuthorization": "Płatność oczekuje na autoryzację u operatora płatności.",
+      "checkStatus": "Sprawdź status",
+      "checkStatusSuccess": "Płatność została autoryzowana.",
+      "stillPending": "Płatność nadal oczekuje na autoryzację."
+    },
+    "edits": {
+      "sendNotification": "Wyślij powiadomienie",
+      "sendNotificationHint": "Powiadom klienta o tej edycji zamówienia."
+    },
+    "claims": {
+      "carryOverPromotion": "Przenieś promocje",
+      "carryOverPromotionHint": "Zastosuj promocje z zamówienia do pozycji reklamacji",
+      "carryOverPromotionTooltip": "Na wysyłane pozycje reklamacji można przenieść tylko promocje kwotowe z alokacją „Każdy” oraz procentowe z alokacją „Każdy” lub „Łącznie”."
+    },
+    "exchanges": {
+      "carryOverPromotion": "Przenieś promocje",
+      "carryOverPromotionHint": "Zastosuj promocje z zamówienia do pozycji wymiany",
+      "carryOverPromotionTooltip": "Na wysyłane pozycje wymiany można przenieść tylko promocje kwotowe z alokacją „Każdy” oraz procentowe z alokacją „Każdy” lub „Łącznie”."
+    },
+    "shipment": {
+      "trackingUrl": "URL śledzenia",
+      "labelUrl": "URL etykiety"
+    },
+    "fulfillment": {
+      "error": {
+        "wrongQuantity_one": "Tylko jeden produkt jest dostępny do realizacji",
+        "wrongQuantity_few": "Ilość powinna być liczbą od 1 do {{number}}",
+        "wrongQuantity_many": "Ilość powinna być liczbą od 1 do {{number}}"
+      },
+      "status": {
+        "awaitingPickup": "Oczekuje na odbiór",
+        "awaitingShipping": "Oczekuje na wysyłkę",
+        "awaitingDelivery": "Oczekuje na doręczenie"
+      }
+    }
+  },
+  "draftOrders": {
+    "list": {
+      "noRecordsMessage": "Nie znaleziono wstępnych zamówień",
+      "description": "Utwórz nowe wstępne zamówienie, aby zacząć.",
+      "filtered": {
+        "heading": "Nie znaleziono wyników",
+        "description": "Żadne wstępne zamówienie nie pasuje do kryteriów filtrowania."
+      }
+    }
+  },
+  "stockLocations": {
+    "list": {
+      "noRecordsMessage": "Brak rekordów",
+      "noRecordsMessageEmpty": "Nie znaleziono lokalizacji",
+      "noRecordsMessageFiltered": "Nie znaleziono lokalizacji pasujących do filtrów"
+    },
+    "delete": {
+      "successToast": "Lokalizacja „{{name}}” została usunięta."
+    }
+  },
+  "promotions": {
+    "list": {
+      "empty": {
+        "heading": "Brak promocji",
+        "description": "Nie ma promocji do wyświetlenia."
+      },
+      "filtered": {
+        "heading": "Brak wyników",
+        "description": "Żadna promocja nie pasuje do bieżących kryteriów filtrowania."
+      }
+    },
+    "fields": {
+      "allocationTooltip": "„Każdy” stosuje limit ilości do każdej pozycji osobno, a „Jednorazowo” – do całego koszyka",
+      "usageLimit": "Limit użycia",
+      "usage": "Użycie"
+    },
+    "form": {
+      "allocation": {
+        "across": {
+          "title": "Łącznie"
+        },
+        "once": {
+          "title": "Jednorazowo",
+          "description": "Stosuje wartość do ograniczonej liczby pozycji"
+        }
+      },
+      "limit": {
+        "title": "Limit użycia",
+        "description": "Maksymalna liczba użyć tej promocji we wszystkich zamówieniach. Pozostaw puste, aby nie ograniczać."
+      }
+    },
+    "templates": {
+      "amount_off_products": {
+        "title": "Rabat kwotowy na produkty",
+        "description": "Rabat na wybrane produkty lub kolekcje produktów"
+      },
+      "amount_off_order": {
+        "title": "Rabat kwotowy na zamówienie",
+        "description": "Obniża łączną kwotę zamówienia"
+      },
+      "percentage_off_product": {
+        "title": "Rabat procentowy na produkt",
+        "description": "Obniża cenę wybranych produktów o procent"
+      },
+      "percentage_off_order": {
+        "title": "Rabat procentowy na zamówienie",
+        "description": "Obniża łączną kwotę zamówienia o procent"
+      },
+      "buy_get": {
+        "title": "Kup X, otrzymaj Y",
+        "description": "Kup X produktów, otrzymaj Y produktów"
+      },
+      "shipping_discount": {
+        "title": "Darmowa wysyłka",
+        "description": "Stosuje 100% rabatu na koszty wysyłki"
+      }
+    }
+  },
+  "campaigns": {
+    "list": {
+      "empty": {
+        "heading": "Brak kampanii",
+        "description": "Nie ma kampanii do wyświetlenia."
+      },
+      "filtered": {
+        "heading": "Brak wyników",
+        "description": "Żadna kampania nie pasuje do bieżących kryteriów filtrowania."
+      }
+    },
+    "fields": {
+      "totalUsedByAttribute": "Łącznie wykorzystano"
+    },
+    "budget": {
+      "attribute": {
+        "customer_id": "klient",
+        "customer_email": "e-mail"
+      },
+      "fields": {
+        "budgetAttribute": "Ogranicz użycie na",
+        "budgetAttributeTooltip": "Określ, ile razy promocja może zostać użyta przez każdego klienta lub adres e-mail.",
+        "totalUsedByAttribute": "Limit budżetu na: {{attribute}}",
+        "totalUsedByAttributeCustomerId": "Limit budżetu na klienta",
+        "totalUsedByAttributeEmail": "Limit budżetu na e-mail"
+      },
+      "type": {
+        "usage": {
+          "title": "Użycie"
+        },
+        "spend": {
+          "title": "Wydatki"
+        },
+        "useByAttribute": {
+          "title": "Użycie wg atrybutu (ID klienta, e-mail itp.)",
+          "titleCustomerId": "Użycie na klienta",
+          "titleEmail": "Użycie na e-mail",
+          "description": "Ustaw limit, ile razy promocja może zostać użyta dla danej wartości atrybutu."
+        }
+      }
+    }
+  },
+  "priceLists": {
+    "list": {
+      "empty": {
+        "heading": "Brak cenników",
+        "description": "Nie ma cenników do wyświetlenia."
+      },
+      "filtered": {
+        "heading": "Brak wyników",
+        "description": "Żaden cennik nie pasuje do bieżących kryteriów filtrowania."
+      }
+    },
+    "quantityPricing": {
+      "header": "Ceny warunkowe dla {{name}}",
+      "description": "Zarządzaj cenami warunkowymi tego wariantu produktu w zależności od jego ilości w koszyku.",
+      "actions": {
+        "addPrice": "Dodaj cenę"
+      },
+      "rules": {
+        "amount": "Cena wariantu produktu",
+        "minQuantity": "Minimalna ilość w koszyku",
+        "maxQuantity": "Maksymalna ilość w koszyku",
+        "qty": "ILOŚĆ",
+        "allQuantities": "Wszystkie ilości",
+        "min": "Min.",
+        "max": "Maks."
+      },
+      "attributes": {
+        "quantity": "Ilość w koszyku"
+      },
+      "summaries": {
+        "range": "Jeśli <0>{{attribute}}</0> jest między <1>{{min}}</1> a <2>{{max}}</2>",
+        "greaterThan": "Jeśli <0>{{attribute}}</0> ≥ <1>{{min}}</1>",
+        "lessThan": "Jeśli <0>{{attribute}}</0> ≤ <1>{{max}}</1>"
+      },
+      "errors": {
+        "minGreaterThanMax": "Minimalna ilość nie może być większa od maksymalnej",
+        "mustBePositive": "Ilość musi wynosić co najmniej 1"
+      }
+    }
+  },
+  "profile": {
+    "mfa": {
+      "title": "Uwierzytelnianie dwuskładnikowe",
+      "description": "Wymagaj aplikacji uwierzytelniającej przy logowaniu.",
+      "status": "Status",
+      "method": "Metoda",
+      "enabled": "Włączone",
+      "disabled": "Wyłączone",
+      "pending": "Oczekuje na konfigurację",
+      "authenticatorApp": "Aplikacja uwierzytelniająca",
+      "noMethod": "Brak włączonej metody uwierzytelniania",
+      "setupTitle": "Skonfiguruj aplikację uwierzytelniającą",
+      "setupAuthenticatorApp": "Skonfiguruj aplikację uwierzytelniającą",
+      "setupDescription": "Zeskanuj kod QR aplikacją uwierzytelniającą, a następnie wpisz 6-cyfrowy kod, aby dokończyć konfigurację.",
+      "setupError": "Nie udało się skonfigurować aplikacji uwierzytelniającej.",
+      "verifyError": "Nie udało się potwierdzić kodu weryfikacyjnego.",
+      "qrError": "Nie udało się wygenerować kodu QR.",
+      "recoveryCodesTitle": "Kody odzyskiwania",
+      "recoveryCodesDescription": "Skopiuj i zachowaj te kody odzyskiwania na wypadek utraty dostępu do aplikacji uwierzytelniającej.",
+      "recoveryCodesError": "Nie udało się wygenerować kodów odzyskiwania.",
+      "disableTitle": "Wyłącz uwierzytelnianie dwuskładnikowe",
+      "disableDescription": "Zamierzasz wyłączyć uwierzytelnianie dwuskładnikowe dla swojego konta.",
+      "disableChallengeDescription": "Wpisz 6-cyfrowy kod z aplikacji uwierzytelniającej, aby wyłączyć uwierzytelnianie dwuskładnikowe.",
+      "disableError": "Nie udało się wyłączyć uwierzytelniania dwuskładnikowego.",
+      "disableSuccess": "Uwierzytelnianie dwuskładnikowe zostało wyłączone"
+    }
+  },
+  "users": {
+    "inviteRolesTooltip": "Jeśli nie wybierzesz roli, użytkownik zostanie zaproszony z rolą superużytkownika.",
+    "inviteStatus": {
+      "accepted": "Przyjęte",
+      "pending": "Oczekujące",
+      "expired": "Wygasłe"
+    },
+    "roles": {
+      "developer": "Programista"
+    }
+  },
+  "roles": {
+    "domain": "Role",
+    "subtitle": "Zarządzaj rolami i uprawnieniami dostępu.",
+    "create": {
+      "header": "Utwórz rolę",
+      "hint": "Utwórz rolę, aby zarządzać dostępem do panelu administracyjnego.",
+      "successToast": "Utworzono rolę {{name}}",
+      "tabs": {
+        "details": "Szczegóły",
+        "permissions": "Uprawnienia"
+      },
+      "permissions": {
+        "empty": {
+          "heading": "Brak uprawnień",
+          "description": "Nie ma uprawnień do wybrania."
+        },
+        "filtered": {
+          "heading": "Brak wyników",
+          "description": "Żadne uprawnienie nie pasuje do bieżących kryteriów filtrowania."
+        }
+      }
+    },
+    "edit": {
+      "header": "Edytuj rolę",
+      "successToast": "Zaktualizowano rolę {{name}}"
+    },
+    "delete": {
+      "title": "Usuń rolę",
+      "description": "Zamierzasz usunąć rolę {{name}}. Ta akcja nie może zostać cofnięta.",
+      "successToast": "Usunięto rolę {{name}}"
+    },
+    "fields": {
+      "permissions": "Uprawnienia"
+    },
+    "actions": {
+      "managePermissions": "Zarządzaj uprawnieniami"
+    },
+    "users": {
+      "alreadyAddedTooltip": "Użytkownik ma już tę rolę.",
+      "unassignableRoleTooltip": "Nie możesz przypisać tej roli — Twoje uprawnienia nie obejmują wszystkich jej polityk.",
+      "add": {
+        "successToast_one": "Użytkownik został dodany do roli.",
+        "successToast_few": "Użytkownicy zostali dodani do roli.",
+        "successToast_many": "Użytkownicy zostali dodani do roli.",
+        "successToast_other": "Użytkownicy zostali dodani do roli.",
+        "list": {
+          "noRecordsMessage": "Najpierw utwórz użytkownika."
+        }
+      },
+      "remove": {
+        "title_one": "Usuń użytkownika",
+        "title_few": "Usuń użytkowników",
+        "title_many": "Usuń użytkowników",
+        "title_other": "Usuń użytkowników",
+        "description_one": "Zamierzasz usunąć {{count}} użytkownika z roli. Ta akcja nie może zostać cofnięta.",
+        "description_few": "Zamierzasz usunąć {{count}} użytkowników z roli. Ta akcja nie może zostać cofnięta.",
+        "description_many": "Zamierzasz usunąć {{count}} użytkowników z roli. Ta akcja nie może zostać cofnięta.",
+        "description_other": "Zamierzasz usunąć {{count}} użytkowników z roli. Ta akcja nie może zostać cofnięta."
+      },
+      "list": {
+        "noRecordsMessage": "Ta rola nie ma użytkowników."
+      }
+    },
+    "permissions": {
+      "header": "Zarządzaj uprawnieniami",
+      "hint": "Wybierz uprawnienia, które ma obejmować ta rola.",
+      "empty": {
+        "heading": "Brak uprawnień",
+        "description": "Nie ma uprawnień do wybrania."
+      },
+      "filtered": {
+        "heading": "Brak wyników",
+        "description": "Żadne uprawnienie nie pasuje do bieżących kryteriów filtrowania."
+      }
+    },
+    "list": {
+      "empty": {
+        "heading": "Nie znaleziono ról",
+        "description": "Utwórz role, aby zarządzać dostępem do panelu administracyjnego."
+      },
+      "filtered": {
+        "heading": "Brak wyników",
+        "description": "Żadna rola nie pasuje do bieżących kryteriów filtrowania."
+      }
+    }
+  },
+  "policies": {
+    "domain": "Polityki",
+    "subtitle": "Określ uprawnienia, które mogą nadawać role.",
+    "create": {
+      "header": "Utwórz politykę",
+      "hint": "Zdefiniuj nowe uprawnienie, które można przypisać do ról.",
+      "successToast": "Utworzono politykę {{key}}"
+    },
+    "edit": {
+      "header": "Edytuj politykę",
+      "successToast": "Zaktualizowano politykę {{key}}"
+    },
+    "delete": {
+      "title": "Usuń politykę",
+      "description": "Zamierzasz usunąć politykę {{key}}. Ta akcja nie może zostać cofnięta.",
+      "successToast": "Usunięto politykę {{key}}"
+    },
+    "fields": {
+      "roles": "Role",
+      "users": "Użytkownicy"
+    },
+    "list": {
+      "empty": {
+        "heading": "Nie znaleziono polityk",
+        "description": "Utwórz polityki, aby zarządzać uprawnieniami, które mogą nadawać role."
+      },
+      "filtered": {
+        "heading": "Brak wyników",
+        "description": "Żadna polityka nie pasuje do bieżących kryteriów filtrowania."
+      }
+    },
+    "roles": {
+      "list": {
+        "noRecordsMessage": "Żadna rola nie zawiera jeszcze tej polityki."
+      },
+      "empty": {
+        "heading": "Brak ról",
+        "description": "Żadna rola nie zawiera jeszcze tej polityki."
+      }
+    }
+  },
+  "translations": {
+    "domain": "Tłumaczenia",
+    "subtitle": "Zarządzaj tłumaczeniami swoich danych w Medusie",
+    "settings": {
+      "header": "Zarządzaj elementami do tłumaczenia",
+      "successToast": "Ustawienia zostały zaktualizowane"
+    },
+    "actions": {
+      "manage": "Zarządzaj tłumaczeniami",
+      "manageEntities": "Zarządzaj elementami",
+      "manageLocales": "Zarządzaj językami"
+    },
+    "list": {
+      "metrics": "{{translated}} z {{total}} tłumaczeń"
+    },
+    "edit": {
+      "successToast": "Tłumaczenia zostały zaktualizowane",
+      "unsavedChanges": {
+        "title": "Niezapisane tłumaczenia",
+        "description": "Nie trać swojej pracy. Masz zmiany, które nie zostały jeszcze zapisane"
+      }
+    },
+    "bulk": {
+      "header": "Edytor zbiorczy tłumaczeń",
+      "mainColumn": "Język"
+    },
+    "activeLocales": {
+      "heading": "Języki",
+      "subtitle": "Aktywne tłumaczenia",
+      "noLocalesTip": "Skonfiguruj co najmniej jeden język, aby zacząć tłumaczyć swoje dane",
+      "noLocalesTipConfigureAction": "Skonfiguruj"
+    },
+    "completion": {
+      "heading": "Przetłumaczone pola",
+      "translated": "Przetłumaczone",
+      "toTranslate": "Brakujące",
+      "footer": "Języki"
+    }
+  },
+  "store": {
+    "defaultLocale": "Domyślny język",
+    "locales": "Języki",
+    "removeLocaleWarning_one": "Zamierzasz usunąć {{count}} język ze swojego sklepu. Wszystkie tłumaczenia w tym języku zostaną usunięte.",
+    "removeLocaleWarning_few": "Zamierzasz usunąć {{count}} języki ze swojego sklepu. Wszystkie tłumaczenia w tych językach zostaną usunięte.",
+    "removeLocaleWarning_many": "Zamierzasz usunąć {{count}} języków ze swojego sklepu. Wszystkie tłumaczenia w tych językach zostaną usunięte.",
+    "removeLocaleWarning_other": "Zamierzasz usunąć {{count}} języków ze swojego sklepu. Wszystkie tłumaczenia w tych językach zostaną usunięte.",
+    "localeAlreadyAdded": "Ten język został już dodany do Twojego sklepu.",
+    "toast": {
+      "localesUpdated": "Języki zostały pomyślnie zaktualizowane",
+      "localesRemoved": "Pomyślnie usunięto języki ze sklepu"
+    }
+  },
+  "regions": {
+    "list": {
+      "empty": {
+        "heading": "Brak regionów",
+        "description": "Nie ma regionów do wyświetlenia."
+      },
+      "filtered": {
+        "heading": "Brak wyników",
+        "description": "Żaden region nie pasuje do bieżących kryteriów filtrowania."
+      }
+    }
+  },
+  "login": {
+    "title": "Witamy w Medusie",
+    "mfa": {
+      "title": "Uwierzytelnianie dwuskładnikowe",
+      "description": "Wpisz 6-cyfrowy kod z aplikacji uwierzytelniającej.",
+      "recoveryDescription": "Wpisz jeden ze swoich kodów odzyskiwania.",
+      "recoveryCodePlaceholder": "Kod odzyskiwania",
+      "verify": "Zweryfikuj",
+      "verifyError": "Nie udało się potwierdzić kodu weryfikacyjnego.",
+      "completeError": "Nie udało się dokończyć uwierzytelniania.",
+      "backToLogin": "Wróć do logowania",
+      "useRecoveryCodePrompt": "Nie masz dostępu do aplikacji uwierzytelniającej?",
+      "useRecoveryCode": "Użyj kodu odzyskiwania",
+      "useAuthenticatorPrompt": "Masz dostęp do aplikacji uwierzytelniającej?",
+      "useAuthenticator": "Użyj kodu z aplikacji"
+    }
+  },
+  "propertyLabels": {
+    "domain": "Etykiety właściwości",
+    "title": "Etykiety właściwości",
+    "subtitle": "Zarządzaj własnymi etykietami właściwości dla konfigurowalnych tabel swoich danych.",
+    "fields": {
+      "module": "Moduł",
+      "model": "Model",
+      "propertyCount": "Liczba właściwości",
+      "hasOverrides": "Ma nadpisania"
+    }
+  },
+  "fields": {
+    "thumbnail": "Miniatura",
+    "actions": "Akcje",
+    "promotionCode": "Kod promocyjny",
+    "resource": "Zasób",
+    "operation": "Operacja"
+  },
+  "views": {
+    "save": "Zapisz",
+    "saveAsNew": "Zapisz jako nowy widok",
+    "updateDefaultForEveryone": "Zaktualizuj domyślny dla wszystkich",
+    "updateViewName": "Zaktualizuj widok",
+    "prompts": {
+      "updateDefault": {
+        "title": "Zaktualizuj widok domyślny",
+        "description": "To zaktualizuje widok domyślny dla wszystkich użytkowników. Czy na pewno?",
+        "confirmText": "Zaktualizuj dla wszystkich",
+        "cancelText": "Anuluj"
+      },
+      "updateView": {
+        "title": "Zaktualizuj widok",
+        "description": "Czy na pewno chcesz zaktualizować „{{name}}”?",
+        "confirmText": "Zaktualizuj",
+        "cancelText": "Anuluj"
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "noProviders": "Zarejestruj dostawcę uwierzytelniania w konfiguracji Medusy, aby móc się zalogować",
+      "authenticationFailed": "Uwierzytelnianie nie powiodło się",
+      "cloud": "Zaloguj się przez Medusa Cloud",
+      "continueWithProvider": "Kontynuuj przez {{provider}}",
+      "or": "lub",
+      "provisioningFailed": "Nie udało się dokończyć logowania. Skontaktuj się z administratorem."
+    }
+  },
+  "permissions": {
+    "accessDenied": {
+      "title": "Brak dostępu",
+      "description": "Nie masz uprawnień do tej strony.",
+      "requiredPermission": "Wymagane uprawnienie: {{permission}}",
+      "action": "Nie masz uprawnień do wykonania tej akcji."
+    },
+    "requiredPermissions": {
+      "title": "Wymagane uprawnienia",
+      "none": "Ten widok nie deklaruje żadnych uprawnień.",
+      "anyOf": "Dowolne z",
+      "allOf": "Wszystkie z",
+      "source": "Źródło: {{source}}"
+    },
+    "resources": {
+      "customer": "Klient",
+      "customer_group": "Grupa klientów",
+      "order": "Zamówienie",
+      "product": "Produkt",
+      "product_category": "Kategoria produktów",
+      "product_collection": "Kolekcja produktów",
+      "product_tag": "Tag produktu",
+      "product_type": "Typ produktu",
+      "inventory": "Magazyn",
+      "reservation": "Rezerwacja",
+      "promotion": "Promocja",
+      "campaign": "Kampania",
+      "price_list": "Cennik",
+      "region": "Region",
+      "store": "Sklep",
+      "user": "Użytkownik",
+      "role": "Rola",
+      "permission": "Uprawnienie",
+      "sales_channel": "Kanał sprzedaży",
+      "stock_location": "Lokalizacja magazynowa",
+      "shipping_profile": "Profil wysyłki",
+      "shipping_option": "Opcja wysyłki",
+      "tax_region": "Region podatkowy",
+      "api_key": "Klucz API",
+      "return_reason": "Powód zwrotu",
+      "refund_reason": "Powód zwrotu pieniędzy",
+      "workflow": "Przepływ pracy",
+      "translation": "Tłumaczenie"
+    },
+    "actions": {
+      "read": "Podgląd",
+      "create": "Tworzenie",
+      "update": "Edycja",
+      "delete": "Usuwanie"
+    }
+  }
+}

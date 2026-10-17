@@ -10,6 +10,7 @@ import {
   Text,
   toast,
 } from "@medusajs/ui"
+import { useTranslation } from "react-i18next"
 
 type ProductWidgetProps = {
   data: { id: string }
@@ -43,6 +44,7 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 const LocalizedSlugsWidget = ({ data }: ProductWidgetProps) => {
+  const { t } = useTranslation()
   const [slugs, setSlugs] = useState<LocalizedSlugEntry[]>([])
   const [supportedLocales, setSupportedLocales] = useState<string[]>([])
   const [draft, setDraft] = useState<Record<string, string>>({})
@@ -94,9 +96,13 @@ const LocalizedSlugsWidget = ({ data }: ProductWidgetProps) => {
       )
       setSlugs(res.localized_slugs)
       setIsOpen(false)
-      toast.success("Localized slugs updated")
+      toast.success(t("localizedSlugs.toast.updated"))
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to save")
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : t("localizedSlugs.toast.saveFailed")
+      )
     } finally {
       setIsSaving(false)
     }
@@ -110,15 +116,15 @@ const LocalizedSlugsWidget = ({ data }: ProductWidgetProps) => {
   return (
     <Container className="divide-y p-0">
       <div className="flex items-center justify-between px-6 py-4">
-        <Heading level="h2">Localized Slugs</Heading>
+        <Heading level="h2">{t("localizedSlugs.title")}</Heading>
         <Button size="small" variant="secondary" onClick={openDrawer}>
-          Edit
+          {t("actions.edit")}
         </Button>
       </div>
       <div className="px-6 py-4">
         {sortedSlugs.length === 0 ? (
           <Text size="small" className="text-ui-fg-subtle">
-            No localized slugs set for this product yet.
+            {t("localizedSlugs.empty")}
           </Text>
         ) : (
           <div className="flex flex-col gap-y-2">
@@ -139,12 +145,12 @@ const LocalizedSlugsWidget = ({ data }: ProductWidgetProps) => {
       <Drawer open={isOpen} onOpenChange={setIsOpen}>
         <Drawer.Content>
           <Drawer.Header>
-            <Drawer.Title>Localized Slugs</Drawer.Title>
+            <Drawer.Title>{t("localizedSlugs.title")}</Drawer.Title>
           </Drawer.Header>
           <Drawer.Body className="flex flex-col gap-y-4">
             {supportedLocales.length === 0 ? (
               <Text size="small" className="text-ui-fg-subtle">
-                No supported locales are configured for the store yet.
+                {t("localizedSlugs.noLocales")}
               </Text>
             ) : (
               supportedLocales.map((locale) => (
@@ -152,7 +158,7 @@ const LocalizedSlugsWidget = ({ data }: ProductWidgetProps) => {
                   <Label size="small">{locale}</Label>
                   <Input
                     value={draft[locale] ?? ""}
-                    placeholder="e.g. koszulka-meska"
+                    placeholder={t("localizedSlugs.placeholder")}
                     onChange={(event) =>
                       setDraft((prev) => ({
                         ...prev,
@@ -166,10 +172,10 @@ const LocalizedSlugsWidget = ({ data }: ProductWidgetProps) => {
           </Drawer.Body>
           <Drawer.Footer>
             <Drawer.Close asChild>
-              <Button variant="secondary">Cancel</Button>
+              <Button variant="secondary">{t("actions.cancel")}</Button>
             </Drawer.Close>
             <Button onClick={handleSave} isLoading={isSaving}>
-              Save
+              {t("actions.save")}
             </Button>
           </Drawer.Footer>
         </Drawer.Content>
