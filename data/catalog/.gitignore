@@ -1,0 +1,16 @@
+# Working files of the catalog pipeline: candidate lists, review thumbnails,
+# contact sheets and downloaded originals. Regenerable with scripts/.
+work/
+
+# Optimized product images (~hundreds of MB). They are published by uploading
+# them to the backend's File Module (see README.md), not through git.
+images/
+
+# Per-environment upload manifests (file URLs returned by a given backend).
+uploads/
+
+# Generated per run: every import CSV is built for one specific backend (its
+# IDs and image URLs), and the validation report holds absolute local paths.
+# Rebuild them with build-csv.mjs / validate-catalog.mjs.
+*.csv
+validation-results.json

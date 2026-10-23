@@ -103,9 +103,11 @@ Local dev / a single all-in-one deployment can leave this at the default
 | `S3_SECRET_ACCESS_KEY` | **Required.** Railway Bucket: `${{<bucket>.SECRET_ACCESS_KEY}}` |
 | `S3_BUCKET` | **Required.** Railway Bucket: `${{<bucket>.BUCKET}}` (not `RAILWAY_BUCKET_NAME`) |
 | `S3_ENDPOINT` | Omit for real AWS S3; required for Railway Bucket (`${{<bucket>.ENDPOINT}}`), R2, MinIO |
-| `S3_REGION` | Optional, defaults to `us-east-1`. `auto` for Railway Bucket (`${{<bucket>.REGION}}`) and R2 |
+| `S3_REGION` | Optional, defaults to `us-east-1`. Railway Bucket and R2: the literal value `auto`, **not** `${{<bucket>.REGION}}` - in this project that reference resolved to the bucket's location (`ams`), and the storage rejected everything the backend signed with it as `SignatureDoesNotMatch` (uploads failed with HTTP 500) |
 | `S3_FORCE_PATH_STYLE` | `true` only for MinIO and for Railway buckets whose **Credentials** tab asks for path-style URLs (older buckets). Leave unset for new Railway buckets, R2 and AWS S3 (virtual-hosted style) |
 | `S3_ACL` | Leave unset: the ACL header is then omitted, which Railway Bucket, R2 and new AWS buckets require (they reject ACLs). Set `public-read` only for legacy ACL-based buckets |
+| `AWS_REQUEST_CHECKSUM_CALCULATION` | `WHEN_REQUIRED` for Railway Bucket and other S3-compatible storage. Read by the AWS SDK itself, not by Medusa. With the SDK default (`WHEN_SUPPORTED`) every presigned upload URL - e.g. the one Admin's product import PUTs the CSV to - carries the CRC32 of an **empty** body (`x-amz-checksum-crc32=AAAAAA==`), which no real file matches |
+| `AWS_RESPONSE_CHECKSUM_VALIDATION` | `WHEN_REQUIRED`, for the same reason: stops the SDK adding `x-amz-checksum-mode` to presigned download URLs |
 
 S3 is enabled only when all four **required** vars are set. If only some
 `S3_*` vars are set, the backend logs `S3 file storage is only partially
@@ -188,7 +190,8 @@ Setup:
 3. On the Function, set (replace `<bucket>` with the bucket service's name):
    ```
    S3_ENDPOINT=${{<bucket>.ENDPOINT}}
-   S3_REGION=${{<bucket>.REGION}}
+   # a literal value, not ${{<bucket>.REGION}} - see S3_REGION in section 3
+   S3_REGION=auto
    S3_BUCKET=${{<bucket>.BUCKET}}
    S3_ACCESS_KEY_ID=${{<bucket>.ACCESS_KEY_ID}}
    S3_SECRET_ACCESS_KEY=${{<bucket>.SECRET_ACCESS_KEY}}
@@ -199,9 +202,37 @@ Setup:
    (e.g. `media.example.com`). Medusa stores the full URL of every image in
    the database, so changing `S3_FILE_URL` later does **not** update images
    that are already uploaded.
-5. On **both** Server and Worker set the same `S3_*` references plus
-   `S3_FILE_URL=https://<proxy domain>`, then redeploy.
-6. Run the [storage checklist](#8-storage-security--testing-checklist).
+5. On **both** Server and Worker set the same `S3_*` variables as on the
+   Function (including `S3_REGION=auto`) plus
+   `S3_FILE_URL=https://<proxy domain>`, then redeploy. Variable changes
+   only reach a service after its next deploy, so after changing any `S3_*`
+   value redeploy the Server, the Worker **and** the Function - otherwise
+   they run with different settings.
+6. Let Admin upload to the bucket from the browser. Admin's product import
+   PUTs the CSV straight to a presigned bucket URL, so the bucket needs a
+   CORS rule for the Admin origin (Railway's
+   [uploading guide](https://docs.railway.com/storage-buckets/uploading-serving));
+   without it the import fails with "No 'Access-Control-Allow-Origin'
+   header is present". `apps/backend/scripts/bucket-cors.mjs` adds that rule
+   (`PUT`/`POST`, any headers, `MaxAgeSeconds` 3000) with the backend's own
+   AWS SDK - no AWS CLI needed - and keeps rules for other origins. Run it
+   locally with the bucket's **Credentials**; without `--apply` it only
+   reports:
+   ```bash
+   S3_ENDPOINT=<bucket endpoint, e.g. https://t3.storageapi.dev> S3_BUCKET=<bucket name> \
+   S3_ACCESS_KEY_ID=<bucket access key id> S3_SECRET_ACCESS_KEY=<bucket secret> \
+     node apps/backend/scripts/bucket-cors.mjs --origin https://<admin domain> --apply
+   ```
+   `<admin domain>` is wherever `/app` is opened from (the Server's domain
+   unless Admin is served elsewhere); pass `--origin` once per origin. The
+   same rule can be set with `aws s3api put-bucket-cors` as in Railway's
+   guide (add `--region auto`). Check - the response must contain
+   `Access-Control-Allow-Origin`:
+   ```bash
+   curl -si -X OPTIONS https://<bucket name>.<endpoint host>/check \
+     -H "Origin: https://<admin domain>" -H "Access-Control-Request-Method: PUT"
+   ```
+7. Run the [storage checklist](#8-storage-security--testing-checklist).
 
 Cost: Railway doesn't charge for bucket egress, but it does charge for
 service egress, so every image served through the proxy counts as the
@@ -326,6 +357,9 @@ actually publicly reachable at the URL Medusa stores in the database:
    no admin session).
 4. Confirm it returns `HTTP 200` with the image, not `403`/`404`.
 
+If step 1 fails with HTTP 500, the Server log has the storage error - for
+`SignatureDoesNotMatch` see [Troubleshooting](#14-troubleshooting).
+
 If step 4 fails:
 
 - **Railway Bucket:** the URL must start with the bucket proxy's domain
@@ -368,6 +402,13 @@ storefront).
       "S3 file storage is only partially configured" warning in their logs
 - [ ] Bucket proxy Function deployed with the bucket's `S3_*` references,
       reachable on its (custom) domain, and `S3_FILE_URL` points at it
+- [ ] `S3_REGION=auto` (a literal value, not `${{<bucket>.REGION}}`) on the
+      Server, the Worker and the bucket proxy
+- [ ] `AWS_REQUEST_CHECKSUM_CALCULATION=WHEN_REQUIRED` and
+      `AWS_RESPONSE_CHECKSUM_VALIDATION=WHEN_REQUIRED` on the Server and the
+      Worker
+- [ ] Bucket CORS rule allows `PUT` from the Admin origin - Products →
+      Import in Admin uploads the CSV without a CORS error
 - [ ] `WORKER_MODE=server` on the Server service, `WORKER_MODE=worker` on
       the Worker service
 - [ ] Server service's Railway config path is `railway.json`
@@ -416,6 +457,9 @@ non-production environment before you need it for real.
 | `medusa-config.ts` throws on boot in production | `JWT_SECRET`/`COOKIE_SECRET` unset | Set both env vars |
 | Uploaded images 403/404 from the storefront | Railway Bucket served directly instead of through the proxy, or a public bucket without a public-read policy, or `S3_FILE_URL` not matching where files are served | Run the [storage security checklist](#8-storage-security--testing-checklist) |
 | Image upload fails with `AccessControlListNotSupported` / "bucket does not allow ACLs" | `S3_ACL` is set for a provider without ACL support | Unset `S3_ACL` |
+| Image upload fails with HTTP 500 "An unknown error occurred"; Server log: "The request signature we calculated does not match the signature you provided"; presigned download URLs (e.g. product exports) return `403 SignatureDoesNotMatch` | `S3_REGION` is not `auto` - e.g. `${{<bucket>.REGION}}`, which resolves to the bucket's location such as `ams` | Set `S3_REGION=auto` on Server, Worker and the bucket proxy, then redeploy all three |
+| Admin product import fails; browser console: "blocked by CORS policy ... No 'Access-Control-Allow-Origin' header" for a `PUT` to the bucket | The bucket has no CORS rule for the Admin origin | Add it - [Railway Bucket setup](#railway-bucket--bucket-proxy), step 6 |
+| Presigned upload rejected even though CORS passes; the upload URL contains `x-amz-checksum-crc32=AAAAAA==` | The AWS SDK's default checksums put the CRC32 of an empty body into presigned URLs | Set `AWS_REQUEST_CHECKSUM_CALCULATION=WHEN_REQUIRED` and `AWS_RESPONSE_CHECKSUM_VALIDATION=WHEN_REQUIRED` on Server and Worker, redeploy |
 | `ETIMEDOUT`/`ECONNREFUSED`/`NoSuchBucket` to S3-compatible storage | Wrong addressing style for the provider | Railway: follow the bucket's **Credentials** tab (`S3_FORCE_PATH_STYLE=true` only for path-style buckets); MinIO: `true`; R2/AWS: unset |
 | Images uploaded fine before, disappeared after a redeploy | S3 not actually enabled - files went to the ephemeral local disk | Check the `S3_*` vars on the service; a partial set logs "S3 file storage is only partially configured - missing: ..." on boot |
 | Bucket proxy returns `502` | Proxy can't read the bucket (wrong credentials/endpoint/addressing style) | Function logs (`bucket-proxy: reading ... failed`) and its `S3_*` variables |
