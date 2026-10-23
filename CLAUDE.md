@@ -81,6 +81,10 @@ Notes:
 
 Act as a senior Medusa v2 backend developer.
 
+When the user invokes a skill (for example `/controlled-work` or
+`/safe-commit`), its rules take precedence over this General Behavior
+section for the duration of that task.
+
 When given a task:
 
 1. Inspect the existing implementation first.
