@@ -1,40 +1,40 @@
 ---
-description: Przegląda gotowość do wdrożenia, ryzyka środowiskowe, sekrety, migracje i możliwość wycofania zmian. Nie wdraża bez zgody.
+description: Reviews deployment readiness, environment risks, secrets, migrations and the ability to roll back. Does not deploy without approval.
 disable-model-invocation: true
 ---
 
 # Pre-deploy Review
 
-## Zakres
-To przegląd gotowości, a nie zgoda na wdrożenie. Nie wykonuj deploya, migracji produkcyjnych, zmian DNS, rotacji sekretów, kasowania danych ani innych operacji zewnętrznych.
+## Scope
+This is a readiness review, not approval to deploy. Do not deploy, run production migrations, change DNS, rotate secrets, delete data or perform any other external operations.
 
-## Analiza
-Jeśli repozytorium ma własną dokumentację wdrożenia, oprzyj przegląd na niej. W tym projekcie to `docs/deployment-railway.md`, zwłaszcza sekcje „Production deployment checklist” i „Troubleshooting”.
+## Analysis
+If the repository has its own deployment documentation, base the review on it. In this project that is `docs/deployment-railway.md`, especially the "Production deployment checklist" and "Troubleshooting" sections.
 
-Sprawdź odpowiednie pliki i konfiguracje, bez ujawniania wartości sekretów:
-- zmienne środowiskowe wymagane w produkcji i ich obecność (nie wypisuj wartości);
-- rozdzielenie konfiguracji development/staging/production;
-- build/deploy commands i porty;
-- zdrowie aplikacji, logowanie i obsługę błędów;
-- migracje bazy, kompatybilność wsteczną i plan backup/rollback;
-- storage plików, publiczne URL-e i uprawnienia;
-- Redis, kolejki, worker/server mode, jeśli dotyczy;
-- webhooki, idempotencję i obsługę błędów płatności, jeśli dotyczy;
-- CORS, cookies, HTTPS, uprawnienia i ryzyko ujawnienia danych;
-- monitoring oraz możliwość weryfikacji po wdrożeniu.
+Check the relevant files and configuration without revealing secret values:
+- environment variables required in production and whether they are set (do not print values);
+- separation of development/staging/production configuration;
+- build/deploy commands and ports;
+- application health, logging and error handling;
+- database migrations, backward compatibility and the backup/rollback plan;
+- file storage, public URLs and permissions;
+- Redis, queues, worker/server mode, if applicable;
+- webhooks, idempotency and payment error handling, if applicable;
+- CORS, cookies, HTTPS, permissions and the risk of exposing data;
+- monitoring and the ability to verify after deployment.
 
-Nie zakładaj, że dana usługa istnieje — oznacz punkty jako „nie dotyczy” lub „niepotwierdzone”.
+Do not assume a service exists — mark items as "not applicable" or "unconfirmed".
 
-## Testy i komendy
-Nie uruchamiaj lintów, testów, buildów ani komend wdrożeniowych bez wcześniejszego uzgodnienia zakresu z użytkownikiem. Nie odczytuj ani nie drukuj sekretów. Nie wykonuj migracji na produkcji.
+## Tests and commands
+Do not run linters, tests, builds or deployment commands without first agreeing on the scope with the user. Do not read or print secrets. Do not run migrations in production.
 
-## Raport
-Przedstaw:
-- status: gotowe / gotowe z ryzykami / niegotowe / brak danych;
-- blokery i ryzyka wysokie;
-- pozostałe ryzyka;
-- proponowane komendy weryfikacyjne;
-- plan wdrożenia i rollbacku;
-- punkty wymagające potwierdzenia.
+## Report
+Present:
+- status: ready / ready with risks / not ready / insufficient data;
+- blockers and high risks;
+- other risks;
+- proposed verification commands;
+- the deployment and rollback plan;
+- items that need confirmation.
 
-Zatrzymaj się przed każdą operacją zmieniającą system zewnętrzny i poproś o wyraźną zgodę na konkretną operację.
+Stop before any operation that changes an external system and ask for explicit approval of that specific operation.

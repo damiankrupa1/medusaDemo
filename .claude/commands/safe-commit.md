@@ -1,28 +1,28 @@
 ---
-description: Bezpieczne przygotowanie commita Git. Sprawdza branch, zmienione pliki i diff, proponuje wiadomość commit i zawsze wymaga wyraźnej zgody użytkownika przed wykonaniem git commit.
+description: Safely prepares a Git commit. Checks the branch, changed files and diff, proposes a commit message and always requires explicit user approval before running git commit.
 disable-model-invocation: true
 ---
 
 # Safe Commit
 
-## Cel
+## Goal
 
-Przygotuj commit w sposób kontrolowany. Użytkownik musi znać zakres zmian i zatwierdzić operację przed wykonaniem `git commit`.
+Prepare a commit in a controlled way. The user must know the scope of the changes and approve the operation before `git commit` is run.
 
-## Bezwzględne zasady
+## Absolute rules
 
-- Nigdy nie wykonuj `git commit` bez wyraźnej zgody użytkownika na konkretny commit.
-- Nie traktuj wcześniejszej zgody na implementację ani uruchomienie testów jako zgody na commit.
-- Nie wykonuj `git push`, nie zmieniaj brancha, nie twórz tagów i nie modyfikuj historii Git bez osobnej zgody.
-- Nie używaj `git add .`, `git add -A` ani `git commit -a`.
-- Nie nadpisuj, nie usuwaj i nie resetuj zmian użytkownika.
-- Nie zmieniaj automatycznie treści plików tylko po to, aby przygotować commit.
-- Nie pomijaj hooków Git ani kontroli bezpieczeństwa.
-- Jeśli nie można jednoznacznie określić zakresu commita, zatrzymaj się i zapytaj.
+- Never run `git commit` without the user's explicit approval of that specific commit.
+- Do not treat earlier approval of an implementation or of running tests as approval of a commit.
+- Do not run `git push`, switch branches, create tags or rewrite Git history without separate approval.
+- Do not use `git add .`, `git add -A` or `git commit -a`.
+- Do not overwrite, delete or reset the user's changes.
+- Do not change file contents automatically just to prepare a commit.
+- Do not skip Git hooks or safety checks.
+- If the scope of the commit cannot be determined unambiguously, stop and ask.
 
-## Etap 1: Inspekcja
+## Stage 1: Inspection
 
-Wykonaj wyłącznie polecenia odczytujące stan repozytorium:
+Run only commands that read the repository state:
 
 1. `git status --short --branch`
 2. `git branch --show-current`
@@ -32,82 +32,82 @@ Wykonaj wyłącznie polecenia odczytujące stan repozytorium:
 6. `git diff --cached`
 7. `git ls-files --others --exclude-standard`
 
-Dostosuj polecenia do sytuacji, jeśli repozytorium jest duże lub diff jest obszerny. W razie potrzeby sprawdź konkretne pliki.
+Adapt the commands if the repository is large or the diff is extensive. Inspect specific files when needed.
 
-Nie wypisuj wartości sekretów. Jeśli wykryjesz potencjalne sekrety, pliki `.env`, klucze prywatne lub dane dostępowe, nie ujawniaj ich zawartości i ostrzeż użytkownika.
+Do not print secret values. If you find potential secrets, `.env` files, private keys or credentials, do not reveal their contents and warn the user.
 
-Nie uruchamiaj testów, lintów, typechecków ani buildów tylko na potrzeby przygotowania commita. Ich zakres powinien być uzgodniony osobno.
+Do not run tests, linters, typechecks or builds just to prepare a commit. Their scope should be agreed separately.
 
-## Etap 2: Analiza
+## Stage 2: Analysis
 
-Przedstaw użytkownikowi:
+Present to the user:
 
-- aktualny branch;
-- liczbę i nazwy zmienionych plików;
-- podział na staged, unstaged i untracked;
-- podsumowanie istotnych zmian;
-- podejrzane, przypadkowe lub wrażliwe pliki;
-- informację o plikach, których nie można bezpiecznie ocenić;
-- proponowaną wiadomość Conventional Commit;
-- dokładną listę plików przeznaczonych do commita.
+- the current branch;
+- the number and names of changed files;
+- the split into staged, unstaged and untracked;
+- a summary of the significant changes;
+- suspicious, accidental or sensitive files;
+- files that cannot be assessed safely;
+- a proposed Conventional Commit message;
+- the exact list of files intended for the commit.
 
-Nie zakładaj, że wszystkie zmienione pliki należą do jednego commita. Jeśli zmiany są niezwiązane, zaproponuj ich rozdzielenie.
+Do not assume that all changed files belong in one commit. If the changes are unrelated, propose splitting them.
 
-## Etap 3: Prośba o zgodę
+## Stage 3: Request for approval
 
-Zatrzymaj się przed jakąkolwiek operacją zapisującą do indeksu Git lub tworzącą commit.
+Stop before any operation that writes to the Git index or creates a commit.
 
-Pokaż raport w formacie:
+Show the report in this format, writing it and the question below in the user's language:
 
 ```text
 BRANCH: ...
-ZAKRES: ...
-PLIKI DO COMMITA: ...
-POMINIĘTE PLIKI: ...
-PROPOZYCJA COMMIT MESSAGE: ...
-TESTY / WERYFIKACJA: ... (tylko rzeczywiście wykonane)
-OSTRZEŻENIA: ...
+SCOPE: ...
+FILES TO COMMIT: ...
+SKIPPED FILES: ...
+PROPOSED COMMIT MESSAGE: ...
+TESTS / VERIFICATION: ... (only checks actually run)
+WARNINGS: ...
 ```
 
-Zapytaj wprost:
+Ask directly:
 
-„Czy zatwierdzasz dokładnie ten zestaw plików i tę wiadomość commita?”
+"Do you approve exactly this set of files and this commit message?"
 
-Nie wykonuj commita, dopóki użytkownik nie odpowie twierdząco.
+Do not commit until the user answers affirmatively.
 
-Odpowiedź musi jednoznacznie dotyczyć przedstawionego commita. Nie traktuj niejednoznacznej wypowiedzi jako zgody.
+The answer must clearly refer to the commit presented. Do not treat an ambiguous reply as approval.
 
-## Etap 4: Przygotowanie
+## Stage 4: Preparation
 
-Po uzyskaniu zgody:
+After approval:
 
-1. Ponownie sprawdź `git status --short --branch`.
-2. Zweryfikuj, czy branch i zawartość plików nie zmieniły się od czasu akceptacji.
-3. Jeśli cokolwiek istotnego się zmieniło, anuluj operację i przedstaw zaktualizowany raport do ponownej akceptacji.
-4. Dodaj do indeksu wyłącznie zaakceptowane pliki, używając jawnych ścieżek.
-5. Sprawdź `git diff --cached` oraz `git diff --cached --stat`.
-6. Jeśli rzeczywisty zakres staged changes różni się od zaakceptowanego, nie wykonuj commita. Wyjaśnij różnicę i poproś o ponowną zgodę.
+1. Check `git status --short --branch` again.
+2. Verify that the branch and the file contents have not changed since approval.
+3. If anything significant has changed, cancel the operation and present an updated report for approval.
+4. Add only the approved files to the index, using explicit paths.
+5. Check `git diff --cached` and `git diff --cached --stat`.
+6. If the actual staged changes differ from what was approved, do not commit. Explain the difference and ask for approval again.
 
-Nie usuwaj ani nie zastępuj cudzych zmian już znajdujących się w indeksie. Jeśli nie da się bezpiecznie odseparować zmian użytkownika, zatrzymaj się.
+Do not remove or replace other changes already in the index. If the user's changes cannot be separated safely, stop.
 
-## Etap 5: Commit
+## Stage 5: Commit
 
-Wykonaj `git commit` dopiero wtedy, gdy:
-- użytkownik zaakceptował konkretny zakres i wiadomość;
-- branch i staged diff zostały ponownie zweryfikowane;
-- nie ma nierozwiązanych problemów z zakresem commita.
+Run `git commit` only when:
+- the user has approved the specific scope and message;
+- the branch and the staged diff have been verified again;
+- there are no unresolved issues with the scope of the commit.
 
-Użyj zaakceptowanej wiadomości. Nie zmieniaj jej samodzielnie.
+Use the approved message. Do not change it on your own.
 
-Jeśli hook Git odrzuci commit, przedstaw błąd i zapytaj o dalsze działania. Nie omijaj hooków i nie poprawiaj automatycznie plików bez zgody.
+If a Git hook rejects the commit, present the error and ask how to proceed. Do not bypass hooks and do not fix files automatically without approval.
 
-## Etap 6: Podsumowanie
+## Stage 6: Summary
 
-Po zakończeniu podaj:
-- hash commita;
-- wiadomość commita;
-- branch;
-- listę zatwierdzonych plików;
-- wynik operacji.
+When done, report:
+- the commit hash;
+- the commit message;
+- the branch;
+- the list of committed files;
+- the result of the operation.
 
-Nie wykonuj automatycznie `git push`.
+Do not run `git push` automatically.

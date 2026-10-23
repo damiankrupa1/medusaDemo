@@ -1,58 +1,58 @@
 ---
-description: Workflow do realizacji zadań programistycznych z obowiązkowym uzgodnieniem zakresu zmian i testów przed implementacją.
+description: Workflow for programming tasks that requires agreeing on the scope of changes and tests with the user before implementation.
 ---
 
 # Controlled Work
 
-## Zasada nadrzędna
+## Overriding rule
 
-Użytkownik kontroluje zakres implementacji oraz weryfikacji. Nie uruchamiaj testów, lintów, buildów ani innych komend weryfikacyjnych bez wcześniejszego uzgodnienia ich zakresu z użytkownikiem.
+The user controls the scope of implementation and verification. Do not run tests, linters, builds or any other verification commands without first agreeing on their scope with the user.
 
-## Etap 1: Analiza
+## Stage 1: Analysis
 
-1. Zrozum zadanie i przeanalizuj odpowiednie fragmenty kodu.
-2. Sprawdź dostępne skrypty w package.json, konfigurację testów i istniejące konwencje.
-3. Nie modyfikuj jeszcze kodu.
-4. Nie uruchamiaj testów, lintów, buildów ani skryptów weryfikacyjnych.
+1. Understand the task and analyze the relevant parts of the code.
+2. Check the available scripts in package.json, the test configuration and existing conventions.
+3. Do not modify any code yet.
+4. Do not run tests, linters, builds or verification scripts.
 
-## Etap 2: Plan i uzgodnienie
+## Stage 2: Plan and agreement
 
-Przed implementacją przedstaw:
+Before implementing, present:
 
-- proponowane zmiany i pliki, których dotyczą;
-- ryzyka i potencjalne skutki uboczne;
-- proponowany zakres weryfikacji, podzielony na:
-  - testy ukierunkowane;
-  - lint i formatowanie;
+- the proposed changes and the files they affect;
+- risks and potential side effects;
+- the proposed verification scope, split into:
+  - targeted tests;
+  - lint and formatting;
   - typecheck;
   - build;
-  - testy integracyjne lub e2e.
+  - integration or e2e tests.
 
-Dla każdej komendy podaj, dlaczego jest potrzebna i czy jest niezbędna.
+For each command, state why it is needed and whether it is essential.
 
-Zaproponuj minimalny, proporcjonalny do zadania zestaw sprawdzeń.
+Propose a minimal set of checks proportionate to the task.
 
-Zatrzymaj się i poproś o akceptację planu oraz zakresu weryfikacji. Nie implementuj zmian przed uzyskaniem zgody.
+Stop and ask for approval of the plan and the verification scope. Do not implement changes before you get approval.
 
-## Etap 3: Implementacja
+## Stage 3: Implementation
 
-Po akceptacji wykonaj uzgodnione zmiany.
+After approval, make the agreed changes.
 
-Nie rozszerzaj samodzielnie zakresu weryfikacji. Jeśli pojawi się potrzeba dodatkowych testów lub komend, wyjaśnij przyczynę i zapytaj użytkownika przed ich uruchomieniem.
+Do not extend the verification scope on your own. If additional tests or commands become necessary, explain why and ask the user before running them.
 
-## Etap 4: Weryfikacja
+## Stage 4: Verification
 
-Uruchom wyłącznie zaakceptowane komendy.
+Run only the approved commands.
 
-Nie uruchamiaj ponownie pełnego zestawu testów po każdej drobnej poprawce, jeśli nie zostało to uzgodnione.
+Do not rerun the full test suite after every small fix unless that was agreed.
 
-Jeśli sprawdzenie nie przejdzie, przedstaw wynik i zaproponuj dalsze kroki. Nie ukrywaj błędów ani nie twierdź, że testy przeszły, jeśli ich nie uruchomiono.
+If a check fails, present the result and propose next steps. Do not hide errors, and do not claim tests passed if they were not run.
 
-## Etap 5: Podsumowanie
+## Stage 5: Summary
 
-Podaj:
-- co zostało zmienione;
-- jakie zaakceptowane komendy uruchomiono;
-- ich rzeczywiste wyniki;
-- czego nie sprawdzono;
-- ewentualne ryzyka pozostałe po zmianach.
+Report:
+- what was changed;
+- which approved commands were run;
+- their actual results;
+- what was not checked;
+- any risks remaining after the changes.

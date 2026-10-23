@@ -1,41 +1,41 @@
 ---
-description: Diagnozuje błąd metodycznie, szuka przyczyny źródłowej i proponuje minimalną poprawkę przed zmianami w kodzie.
+description: Diagnoses a bug methodically, looks for the root cause and proposes a minimal fix before changing the code.
 disable-model-invocation: true
 ---
 
 # Debug Systematically
 
-## Cel
-Naprawiać przyczynę błędu, a nie maskować objawy przez losowe zmiany.
+## Goal
+Fix the cause of the bug instead of masking the symptoms with random changes.
 
-## Etap 1: Zebranie danych
-- Ustal oczekiwane i rzeczywiste zachowanie.
-- Zbierz dokładny komunikat błędu, kroki reprodukcji, kontekst i ostatnie zmiany, jeśli są dostępne.
-- Przeczytaj odpowiednie pliki i konfigurację.
-- Nie uruchamiaj testów, buildów, lintów, migracji ani komend mogących zmienić dane bez uzgodnienia.
+## Stage 1: Gathering data
+- Establish the expected and the actual behavior.
+- Collect the exact error message, reproduction steps, context and recent changes, if available.
+- Read the relevant files and configuration.
+- Do not run tests, builds, linters, migrations or commands that may change data without agreement.
 
-## Etap 2: Hipotezy
-- Podaj najbardziej prawdopodobne przyczyny, uporządkowane według siły dowodów.
-- Oddziel obserwacje od hipotez.
-- Zaproponuj najmniejszy eksperyment, który rozróżni hipotezy.
-- Poproś o zgodę na komendy diagnostyczne, jeśli nie zostały wcześniej zatwierdzone.
+## Stage 2: Hypotheses
+- List the most likely causes, ordered by the strength of the evidence.
+- Separate observations from hypotheses.
+- Propose the smallest experiment that distinguishes between the hypotheses.
+- Ask for approval of diagnostic commands if they have not been approved before.
 
-## Etap 3: Plan naprawy
-Przed zmianami opisz:
-- przyczynę źródłową lub aktualny poziom pewności;
-- pliki, które należy zmienić;
-- minimalny zakres poprawki;
-- ryzyko regresji;
-- proponowaną weryfikację.
+## Stage 3: Fix plan
+Before making changes, describe:
+- the root cause, or your current level of confidence;
+- the files that need to change;
+- the minimal scope of the fix;
+- the regression risk;
+- the proposed verification.
 
-Zatrzymaj się po planie i poczekaj na zgodę na implementację.
+Stop after the plan and wait for approval of the implementation.
 
-## Etap 4: Poprawka
-Po akceptacji:
-- zmieniaj tylko kod potrzebny do naprawy;
-- nie dodawaj zależności bez uzasadnienia i zgody;
-- nie wyciszaj wyjątków ani nie osłabiaj walidacji tylko po to, by ukryć błąd;
-- nie zmieniaj danych produkcyjnych ani nie wykonuj destrukcyjnych operacji.
+## Stage 4: Fix
+After approval:
+- change only the code needed for the fix;
+- do not add dependencies without justification and approval;
+- do not silence exceptions or weaken validation just to hide the bug;
+- do not change production data or perform destructive operations.
 
-## Etap 5: Wynik
-Uruchom wyłącznie uzgodnione sprawdzenia. Podaj przyczynę, zmianę, wyniki i ograniczenia. Jeśli przyczyna nie została potwierdzona, powiedz to wprost.
+## Stage 5: Result
+Run only the agreed checks. Report the cause, the change, the results and the limitations. If the cause was not confirmed, say so plainly.
