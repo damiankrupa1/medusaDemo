@@ -1,16 +1,18 @@
 # Deploying the Medusa backend to Railway
 
-This covers the `apps/backend` Medusa v2 backend only. The storefront
-(`apps/storefront`, a Next.js app - see the note at the end) deploys
-separately to Vercel and is out of scope here.
+This covers the `apps/backend` Medusa v2 backend only. The maintained Nuxt
+storefront lives in the separate `nuxt-starter-medusa` repository. An
+old/template storefront directory may exist in this checkout, but it is not
+the deployed storefront. Consult the Nuxt repository for its deployment and
+hosting configuration, which are out of scope here.
 
 ## 1. Architecture
 
 ```
                  ┌──────────────────────────────────┐
-  Vercel         │             RAILWAY              │
-  storefront ───▶│  Medusa Server (API/Admin)       │
-  (HTTPS)        │        │                         │
+  Nuxt storefront│             RAILWAY              │
+  (separate repo)──▶ Medusa Server (API/Admin)       │
+                 │        │                         │
                  │        ├─▶ PostgreSQL             │
                  │        ├─▶ Redis                  │
                  │        └─▶ Bucket (private) ◀──┐  │
@@ -80,7 +82,7 @@ production.
 ### CORS
 | Var | Example |
 |---|---|
-| `STORE_CORS` | `https://your-storefront.vercel.app` (+ any Vercel preview domain pattern the frontend needs) |
+| `STORE_CORS` | The actual deployed Nuxt storefront origin(s), plus any required preview origins |
 | `ADMIN_CORS` | `https://your-backend.up.railway.app` (wherever `/app` is actually opened from) |
 | `AUTH_CORS` | Union of the above - anything that calls `/auth/*` |
 
@@ -347,15 +349,14 @@ If step 4 fails:
   if either is down. Point Railway's `healthcheckPath` (Server service
   only) at `/health/ready`, not `/health`.
 
-## 10. Vercel → Railway connection
+## 10. Nuxt storefront → Railway connection
 
 The storefront needs the Server service's public Railway domain (or a
 custom domain pointed at it) to call the Medusa API. Set that as the
-storefront's backend-URL env var on Vercel, and add the storefront's Vercel
-domain(s) to `STORE_CORS`/`AUTH_CORS` above. The exact env var name on the
-storefront side depends on what's actually deployed there - not documented
-further here per this task's scope (infrastructure only, not the
-storefront).
+backend URL using the variable and hosting configuration documented in the
+separate `nuxt-starter-medusa` repository. Add the storefront's actual
+deployed origin(s) to `STORE_CORS`/`AUTH_CORS` above. The frontend hosting
+provider and its preview-domain configuration are not specified here.
 
 ## 11. Production deployment checklist
 
@@ -419,7 +420,7 @@ non-production environment before you need it for real.
 | `ETIMEDOUT`/`ECONNREFUSED`/`NoSuchBucket` to S3-compatible storage | Wrong addressing style for the provider | Railway: follow the bucket's **Credentials** tab (`S3_FORCE_PATH_STYLE=true` only for path-style buckets); MinIO: `true`; R2/AWS: unset |
 | Images uploaded fine before, disappeared after a redeploy | S3 not actually enabled - files went to the ephemeral local disk | Check the `S3_*` vars on the service; a partial set logs "S3 file storage is only partially configured - missing: ..." on boot |
 | Bucket proxy returns `502` | Proxy can't read the bucket (wrong credentials/endpoint/addressing style) | Function logs (`bucket-proxy: reading ... failed`) and its `S3_*` variables |
-| CORS errors from the storefront | Storefront's real Vercel domain isn't in `STORE_CORS`/`AUTH_CORS` | Update the CORS env vars, redeploy |
+| CORS errors from the storefront | Storefront's deployed origin isn't in `STORE_CORS`/`AUTH_CORS` | Update the CORS env vars, redeploy |
 | Worker service never processes anything | `WORKER_MODE` not set to `worker` on that service | Check the Worker service's env vars |
 | Migrations didn't run | `preDeployCommand` only exists on the Server service's `railway.json`, not the Worker's | Confirm the Server service is using `railway.json`, and that its deploy log shows the `medusa db:migrate` step |
 | `preDeployCommand` hangs / deploy never progresses past migrations | See [Known open issue](#known-open-issue---verify-on-an-actual-railway-deploy) above - reproduced locally in Docker Desktop/WSL2, not confirmed on Railway's own infrastructure | Check the deploy log's timestamp progress; if it's genuinely stuck (not just a large migration set taking a while), fall back to running `medusa db:migrate` from a full monorepo checkout against the Railway Postgres instead of relying on `preDeployCommand` |
@@ -440,6 +441,6 @@ was given (don't add dependencies without a concrete need):
   project yet.
 - **Resend** - not installed. No transactional email requirement exists in
   this project yet.
-- **Nuxt/Vercel storefront configuration** - out of scope for this pass;
-  the storefront in this repo is actually a Next.js app, not Nuxt (see the
-  project's `CLAUDE.md`, which currently describes it incorrectly).
+- **Nuxt storefront configuration and deployment** - out of scope for this
+  backend guide; the storefront is maintained in the separate
+  `nuxt-starter-medusa` repository.

@@ -8,10 +8,13 @@ disagree, CLAUDE.md wins.
 
 ## Project
 
-- Backend of an e-commerce store on **Medusa v2** (TypeScript, Node.js
-  v22.13+, PostgreSQL 15+, Redis, pnpm 11) in a pnpm/turbo monorepo:
-  `apps/backend`, `apps/storefront`. The Nuxt 4 storefront is a separate
-  application that consumes the Medusa APIs.
+- **Medusa v2 backend** (TypeScript, Node.js v22.13+, PostgreSQL 15+, Redis,
+  pnpm 11) in this pnpm/turbo workspace. The Nuxt storefront is a separate
+  application in the `nuxt-starter-medusa` repository.
+- For storefront/full-stack work, locate that separate checkout and read its
+  own instructions before editing or running commands. This checkout may also
+  contain an old/template `apps/storefront`; it is not the maintained Nuxt app.
+  Never infer Nuxt setup from it or edit it for storefront work unless explicitly asked.
 - PostgreSQL and Redis must already be running. Check before running
   migrations, the dev server or integration tests.
 
@@ -29,8 +32,10 @@ through npx.
 | Type check | `cd apps/backend && pnpm build`, or `tsc --noEmit` there (no `typecheck` script) |
 | Migrations | `cd apps/backend && pnpm medusa db:generate <module>`, then `pnpm medusa db:migrate` |
 
-The backend has no lint script; `pnpm lint` at the root only lints the
-storefront.
+The backend has no lint script. Root `pnpm lint` applies only to packages
+configured in this workspace; it does not lint the separate Nuxt storefront.
+Run storefront commands only from the `nuxt-starter-medusa` checkout and
+consult that repository's instructions.
 
 ## Rules that are easy to get wrong
 

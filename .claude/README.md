@@ -1,54 +1,68 @@
 # Claude Code commands
 
-Procedures for Claude Code live as single files in
-`.claude/commands/<name>.md`; each one creates the command `/<name>`. The
-name comes from the file name, so the frontmatter has no `name` field. This
-README sits outside `commands/` because every `.md` file there becomes a
-command.
+Procedures for Claude Code live as single files in `.claude/commands/<name>.md`. Each file becomes a slash command named after the filename, so the frontmatter does not include a `name` field.
 
-| Command | When to use it | Changes files? |
+This index is deliberately compact: it explains the purpose of each command and the normalization rules that apply across the repo.
+
+| Command | Use when | Changes files? |
 |---|---|---|
-| `/controlled-work` | A programming task with the plan and verification scope agreed before implementation | yes, after approval |
-| `/medusa-feature` | Designing and implementing a Medusa v2 feature in line with the project architecture | yes, after approval |
-| `/architecture-review` | An architectural decision: options, trade-offs, recommendation | no |
-| `/debug-systematically` | Diagnosing a bug and a minimal fix of its root cause | yes, after approval |
-| `/review-changes` | Code review of changes, uncommitted ones by default | no |
-| `/pre-deploy-review` | Deployment readiness review, without deploying | no |
-| `/safe-commit` | A commit after the list of files and the message are approved | creates a commit |
-| `/pixel-perfect` | A frontend view based on a Figma mockup | yes, after approval |
-| `/accessibility-review` | Frontend accessibility review (WCAG) | no |
+| `/controlled-work` | A task needs a plan and explicit verification scope before implementation | Yes, after approval |
+| `/medusa-feature` | Implementing a Medusa v2 feature within the repo's architecture | Yes, after approval |
+| `/architecture-review` | Making an architectural decision with trade-offs and recommendation | No |
+| `/debug-systematically` | Investigating a bug and fixing the root cause with minimal scope | Yes, after approval |
+| `/review-changes` | Reviewing uncommitted changes or a branch diff | No |
+| `/pre-deploy-review` | Checking deployment readiness without deploying | No |
+| `/safe-commit` | Creating a commit only after files and message are approved | Creates a commit |
+| `/pixel-perfect` | Implementing a frontend view from a mockup or reference | Yes, after approval |
+| `/accessibility-review` | Reviewing frontend accessibility (WCAG-focused) | No |
 
-## Invocation
+## When to use a command vs a skill
 
-- Run the commands explicitly, e.g. `/review-changes`. All except
-  `controlled-work` have `disable-model-invocation: true`, so Claude will
-  not invoke them on its own. The documentation does not say clearly
-  whether Claude can invoke a file from `commands/` by itself the way it
-  invokes a skill folder; do not count on it for `controlled-work`.
-- An invoked command takes precedence over the General Behavior section of
-  `CLAUDE.md` for the duration of that task. The other `CLAUDE.md` rules
-  (Medusa architecture, migrations, secrets) still apply.
+Use the right primitive for the task type:
 
-`disable-model-invocation` limits automatic invocation, but it does not
-technically block any command. Risky operations should still be guarded by
-permissions or hooks.
+- Use a command for procedural or policy-based workflows, such as approval gates, reviews, architecture checks, or multi-step validation flows.
+- Use a skill for operational helpers that run concrete actions, such as starting apps, stopping apps, checking environment health, or bootstrapping a local setup.
 
-## Shared rules
+Examples in this repo:
 
-- No command runs tests, linters, builds or migrations without agreeing on
-  the scope with the user.
-- Push, deploy and production operations always need separate approval
-  (`CLAUDE.md`, `safe-commit`, `pre-deploy-review`).
-- The commands are written in English; Claude still answers in the user's
-  language.
+- `/controlled-work`, `/review-changes`, `/safe-commit` are commands because they define how work should be done and when approval is required.
+- `/launch-apps`, `/stop-apps`, and `/check-apps` are skills because they execute concrete developer actions and rely on scripts.
 
-## Copilot
+This separation keeps the repo predictable: commands encode process, while skills encode execution.
 
-`.github/copilot-instructions.md` links to this index, so GitHub Copilot
-follows the same procedures.
+## Available skills
+
+| Skill | Use when |
+|---|---|
+| `/launch-apps` | Starting the Medusa backend in this repository |
+| `/stop-apps` | Stopping the local Medusa backend process |
+| `/check-apps` | Checking the Medusa backend process and HTTP availability |
+
+## Invocation rules
+
+- Run commands explicitly, for example `/review-changes`.
+- Most commands include `disable-model-invocation: true`, which reduces accidental firing but does not fully block execution.
+- A command takes precedence over the general behavior in `CLAUDE.md` for the duration of that task.
+- Repository-specific rules still apply: Medusa architecture, migrations, secrets, and verification scope remain enforced.
+
+## Shared guardrails
+
+- No command runs tests, linters, builds, or migrations without first agreeing on scope with the user.
+- Deployment, push, and production operations always require separate approval.
+- The commands are authored in English, but responses can still be delivered in the user's language.
+
+## Copilot integration
+
+`.github/copilot-instructions.md` points to this index, so GitHub Copilot follows the same workflow conventions.
 
 ## Adding a command
 
-1. Create `.claude/commands/<name>.md` with frontmatter: `description` and
-   usually `disable-model-invocation: true`.
-2. Add the command to the table above.
+1. Create `.claude/commands/<name>.md` with frontmatter including `description` and usually `disable-model-invocation: true`.
+2. Add it to the table above.
+3. Ensure the command name, file name, and purpose stay aligned.
+
+## Recommended project behavior
+
+- Keep every task bounded: small, explicit scope, minimal validation, clear reason.
+- Prefer project standards over ad-hoc improvisation.
+- Use the repo's architecture as the default decision filter.

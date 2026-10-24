@@ -40,7 +40,7 @@
 
 # Medusa DTC Starter
 
-A production-ready monorepo starter for direct-to-consumer ecommerce stores powered by Medusa and Next.js. Includes a fully featured storefront with product browsing, cart, checkout, customer accounts, and order management.
+A Medusa v2 backend for a direct-to-consumer ecommerce store. The maintained Nuxt storefront lives separately in the `nuxt-starter-medusa` repository. An old/template `apps/storefront` directory may also exist in this checkout; it is not the maintained storefront.
 
 ## Features
 
@@ -131,44 +131,7 @@ pnpm dev
 
 7. Open the admin dashboard at `localhost:9000/app` and log in. Retrieve your publishable API key at Settings > Publishable API key.
 
-8. Set up environment variables for the storefront:
-
-```bash
-cp apps/storefront/.env.template apps/storefront/.env.local
-```
-
-9. Update `apps/storefront/.env.local` with your Medusa publishable API key:
-
-```bash
-NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=pk_6c3...
-```
-
-10.  Start storefront:
-
-```bash
-cd apps/storefront
-pnpm dev
-```
-
-The storefront runs on `http://localhost:8000`.
-
-You can slo run the following command from the root to start both backend and storefront:
-
-```bash
-pnpm dev
-```
-
-## Configuration
-
-The storefront is configured via environment variables in `apps/storefront/.env.local`:
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY` | Publishable API key from your Medusa backend | — |
-| `NEXT_PUBLIC_MEDUSA_BACKEND_URL` | URL of your Medusa backend | `http://localhost:9000` |
-| `NEXT_PUBLIC_DEFAULT_REGION` | Default region country code | `dk` |
-| `NEXT_PUBLIC_BASE_URL` | Base URL of the storefront | `https://localhost:8000` |
-| `NEXT_PUBLIC_STRIPE_KEY` | Stripe publishable key (optional) | — |
+8. For the storefront, clone or open the separate `nuxt-starter-medusa` repository. Follow that repository's README and agent instructions for its environment variables, development command, ports, and deployment. Do not use this repository's workspace scripts or configuration to manage the storefront, and do not mistake an old/template `apps/storefront` directory here for the maintained Nuxt application.
 
 ## Deployment
 
@@ -177,7 +140,7 @@ to Railway - Server and Worker services from the same image, PostgreSQL,
 Redis and S3-compatible storage. Full setup (required services, environment
 variables, health checks, backups): [docs/deployment-railway.md](docs/deployment-railway.md).
 
-The storefront (`apps/storefront`) deploys separately to Vercel.
+The Nuxt storefront is maintained and deployed separately from the `nuxt-starter-medusa` repository. Follow that repository's deployment instructions.
 
 ## Resources
 
