@@ -17,6 +17,8 @@ Prepare a commit in a controlled way. The user must know the scope of the change
 - Do not use `git add .`, `git add -A` or `git commit -a`.
 - Do not overwrite, delete or reset the user's changes.
 - Do not change file contents automatically just to prepare a commit.
+- Always write commit messages in English, regardless of the conversation language.
+- Do not add AI co-author attribution or trailers unless the user explicitly requests them.
 - Do not skip Git hooks or safety checks.
 - If the scope of the commit cannot be determined unambiguously, stop and ask.
 
