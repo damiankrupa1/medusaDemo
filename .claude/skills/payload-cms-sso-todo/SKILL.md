@@ -7,7 +7,7 @@ description: 'Tracks the Medusa-side work for embedding the Payload CMS admin pa
 
 Goal: a "CMS" entry in the Medusa admin sidebar that shows the Payload admin panel in an iframe, with the admin already signed in (no second login).
 
-The Payload half is **done** in `simple-landing-page-nuxt/payload-cms` (branch `feat/medusa-admin-sso`). Nothing below is implemented in this repo yet. Follow the layering rules in `CLAUDE.md` (Medusa v2 patterns, env vars for secrets, no hardcoded URLs).
+The Payload half is **done** in `simple-landing-page-nuxt/payload-cms` (branch `feat/medusa-admin-sso`). The code, tests and docs on the Medusa side are implemented (branch `feat/payload-cms-sso`); what is left is the end-to-end check and the deploy. Follow the layering rules in `CLAUDE.md` (Medusa v2 patterns, env vars for secrets, no hardcoded URLs).
 
 ## How it works
 
@@ -26,20 +26,20 @@ The Payload half is **done** in `simple-landing-page-nuxt/payload-cms` (branch `
 
 ## Tasks
 
-- [ ] **Env**: add `PAYLOAD_PUBLIC_URL` and `PAYLOAD_SSO_SECRET` to `apps/backend/.env.template` and to the Railway variables table in `docs/deployment-railway.md`.
-- [ ] **Token util** `apps/backend/src/utils/payload-sso.ts`: `signPayloadSsoToken(email, secret, nowSeconds?)` and `buildPayloadSsoUrl(payloadUrl, token)`. Use `node:crypto` (`createHmac("sha256", secret)`, base64url) so no new dependency is needed.
-- [ ] **Unit test** `apps/backend/src/utils/__tests__/payload-sso.unit.spec.ts` (picked up by `test:unit`): header is `{alg: HS256, typ: JWT}`, claims match the contract, signature equals an independently computed HMAC, TTL <= 120s, URL points at `/api/users/sso/medusa`.
-- [ ] **API route** `apps/backend/src/api/admin/payload-sso/route.ts`, `GET` only:
+- [x] **Env**: add `PAYLOAD_PUBLIC_URL` and `PAYLOAD_SSO_SECRET` to `apps/backend/.env.template` and to the Railway variables table in `docs/deployment-railway.md`.
+- [x] **Token util** `apps/backend/src/utils/payload-sso.ts`: `signPayloadSsoToken(email, secret, nowSeconds?)` and `buildPayloadSsoUrl(payloadUrl, token)`. Use `node:crypto` (`createHmac("sha256", secret)`, base64url) so no new dependency is needed.
+- [x] **Unit test** `apps/backend/src/utils/__tests__/payload-sso.unit.spec.ts` (picked up by `test:unit`): header is `{alg: HS256, typ: JWT}`, claims match the contract, signature equals an independently computed HMAC, TTL <= 120s, URL points at `/api/users/sso/medusa`.
+- [x] **API route** `apps/backend/src/api/admin/payload-sso/route.ts`, `GET` only:
   - `503` when `PAYLOAD_PUBLIC_URL` or `PAYLOAD_SSO_SECRET` is missing;
   - resolve the admin email with `query.graph({ entity: "user", fields: ["email"], filters: { id: req.auth_context.actor_id } })`;
   - `403` when the user has no email; otherwise `res.json({ url })`.
   - Use `AuthenticatedMedusaRequest` from `@medusajs/framework/http`.
-- [ ] **Admin page** `apps/backend/src/admin/routes/cms/page.tsx`:
+- [x] **Admin page** `apps/backend/src/admin/routes/cms/page.tsx`:
   - `defineRouteConfig({ label: "CMS" })` (add an icon only if `@medusajs/icons` is added as a dependency; it is not in `package.json` today);
   - `useQuery` from `@tanstack/react-query` with `queryKey: ["payload-sso"]`, `staleTime: 0`, `gcTime: 0`, `retry: false`, `refetchOnWindowFocus: false` - the URL is single-use and valid for a minute, so never reuse a cached one;
-  - fetch with `credentials: "include"`;
+  - fetch with `sdk.client.fetch` from `src/admin/lib/sdk.ts` (sends the session cookie itself);
   - show loading and error text (`Container` + `Text` from `@medusajs/ui`), then `<iframe title src style={{ width: "100%", height: "calc(100vh - 8rem)", border: 0 }} />`.
-- [ ] **i18n**: add a `payloadCms` block (`title`, `loading`, `loadFailed`) to **both** `src/admin/i18n/json/en.json` and `pl.json`, and use `useTranslation()` in the page. `src/admin/i18n/__tests__/translations.unit.spec.ts` guards the translation files, so run `test:unit` after editing them.
+- [x] **i18n**: add a `payloadCms` block (`title`, `loading`, `loadFailed`) to **both** `src/admin/i18n/json/en.json` and `pl.json`, and use `useTranslation()` in the page. `src/admin/i18n/__tests__/translations.unit.spec.ts` guards the translation files, so run `test:unit` after editing them.
 - [ ] **Verify locally** (Postgres and Redis must be running): start Payload (`pnpm dev` in `payload-cms`, port 3000) and Medusa (`pnpm backend:dev`), set the same secret on both, open `/app/cms` and confirm the Payload dashboard shows up without a login form. Check that `GET /admin/payload-sso` returns `401` without a session.
 - [ ] **Deploy**: see the section below, then run `/pre-deploy-review`.
 

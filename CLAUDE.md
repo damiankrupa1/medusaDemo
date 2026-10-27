@@ -197,6 +197,16 @@ Use only inside a module, and only for focused domain logic. Do not use services
 - Respect Medusa auth/authorization conventions.
 - Do not expose admin functionality on public/store routes.
 
+### Admin customizations (`apps/backend/src/admin`)
+
+- Call this backend's API from widgets and routes with `sdk.client.fetch` from `src/admin/lib/sdk.ts` (`@medusajs/js-sdk`). Do not write a bare `fetch` or a local `fetchJson` helper.
+- Import across admin folders with the root alias (`@/admin/lib/sdk` = `src/admin/lib/sdk`) instead of `../../`. It is configured in `tsconfig.json`, `src/admin/tsconfig.json` and `admin.vite` in `medusa-config.ts`. It works only in admin code: server code (`src/api`, `workflows`, `modules`, ...) is compiled by plain `tsc`, which does not rewrite aliases, so it keeps relative imports. Existing files are migrated gradually.
+- Keep endpoint paths, query keys and cache options out of components: wrap them in a hook in `src/admin/hooks/` (e.g. `usePayloadSsoUrl`) and let the component only render. No extra service/repository layer on top of the SDK.
+- Pass `body` and `query` as objects (the SDK encodes them); errors surface as `FetchError` with the API's message.
+- In new code, read data with `useQuery` and write with `useMutation` from `@tanstack/react-query`. The localized-slugs widget still uses `useEffect` + `useState` with its paths inline; move it to hooks only when it is changed for another reason.
+- Put user-facing strings in `src/admin/i18n/json/en.json` and `pl.json` (same keys in both) and read them with `useTranslation()`.
+- Add admin dependencies to `apps/backend/package.json` from the repo root (`pnpm --filter=@dtc/backend add <pkg>@<exact version>`). The root `pnpm-lock.yaml` is the one the Docker build uses.
+
 ### Validation and error handling
 
 - Validate inputs at the API boundary.

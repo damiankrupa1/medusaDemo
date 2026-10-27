@@ -11,6 +11,7 @@ import {
   toast,
 } from "@medusajs/ui"
 import { useTranslation } from "react-i18next"
+import { sdk } from "@/admin/lib/sdk"
 
 type ProductWidgetProps = {
   data: { id: string }
@@ -25,24 +26,6 @@ type StoreLocale = {
   locale_code: string
 }
 
-async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, {
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    ...init,
-  })
-
-  const body = await response.json().catch(() => ({}))
-
-  if (!response.ok) {
-    const message =
-      typeof body?.message === "string" ? body.message : response.statusText
-    throw new Error(message)
-  }
-
-  return body as T
-}
-
 const LocalizedSlugsWidget = ({ data }: ProductWidgetProps) => {
   const { t } = useTranslation()
   const [slugs, setSlugs] = useState<LocalizedSlugEntry[]>([])
@@ -52,17 +35,19 @@ const LocalizedSlugsWidget = ({ data }: ProductWidgetProps) => {
   const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
-    fetchJson<{ localized_slugs: LocalizedSlugEntry[] }>(
-      `/admin/products/${data.id}/localized-slugs`
-    )
+    sdk.client
+      .fetch<{ localized_slugs: LocalizedSlugEntry[] }>(
+        `/admin/products/${data.id}/localized-slugs`
+      )
       .then((res) => setSlugs(res.localized_slugs))
       .catch(() => {
         // Widget stays empty; the drawer will still let the user try again.
       })
 
-    fetchJson<{ stores: { supported_locales?: StoreLocale[] }[] }>(
-      "/admin/stores"
-    )
+    sdk.client
+      .fetch<{ stores: { supported_locales?: StoreLocale[] }[] }>(
+        "/admin/stores"
+      )
       .then((res) => {
         const locales = res.stores[0]?.supported_locales ?? []
         setSupportedLocales(locales.map((l) => l.locale_code))
@@ -90,10 +75,12 @@ const LocalizedSlugsWidget = ({ data }: ProductWidgetProps) => {
 
     setIsSaving(true)
     try {
-      const res = await fetchJson<{ localized_slugs: LocalizedSlugEntry[] }>(
-        `/admin/products/${data.id}/localized-slugs`,
-        { method: "PUT", body: JSON.stringify(payload) }
-      )
+      const res = await sdk.client.fetch<{
+        localized_slugs: LocalizedSlugEntry[]
+      }>(`/admin/products/${data.id}/localized-slugs`, {
+        method: "PUT",
+        body: payload,
+      })
       setSlugs(res.localized_slugs)
       setIsOpen(false)
       toast.success(t("localizedSlugs.toast.updated"))

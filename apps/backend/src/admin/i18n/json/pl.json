@@ -8,5 +8,10 @@
       "updated": "Slugi językowe zostały zaktualizowane",
       "saveFailed": "Nie udało się zapisać"
     }
+  },
+  "payloadCms": {
+    "title": "CMS",
+    "loading": "Ładowanie CMS…",
+    "loadFailed": "Nie udało się otworzyć CMS"
   }
 }

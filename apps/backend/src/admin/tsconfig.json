@@ -14,6 +14,11 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
+    /* "@/..." is src/... (see admin.vite in medusa-config.ts) */
+    "paths": {
+      "@/*": ["../*"]
+    },
+
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
