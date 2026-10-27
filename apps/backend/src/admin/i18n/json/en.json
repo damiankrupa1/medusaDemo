@@ -8,5 +8,10 @@
       "updated": "Localized slugs updated",
       "saveFailed": "Failed to save"
     }
+  },
+  "payloadCms": {
+    "title": "CMS",
+    "loading": "Loading the CMS…",
+    "loadFailed": "Could not open the CMS"
   }
 }

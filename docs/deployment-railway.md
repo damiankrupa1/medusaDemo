@@ -117,6 +117,26 @@ configured - missing: ...` on boot and falls back to the local-disk file
 provider - fine for a quick test, **not** fine for production on Railway,
 since the container filesystem is ephemeral and wiped on every redeploy.
 
+### Payload CMS (Server service)
+
+Only needed for the "CMS" page in Admin, which embeds the Payload admin panel
+in an iframe and signs the admin in with a short-lived token. The Worker does
+not serve HTTP, so these two variables are for the **Server** only. Without
+them `GET /admin/payload-sso` answers `503` and the CMS page shows an error.
+
+| Var | Notes |
+|---|---|
+| `PAYLOAD_PUBLIC_URL` | The public Payload URL the **browser** opens (e.g. `https://cms.shop.pl`). Not a `*.railway.internal` address |
+| `PAYLOAD_SSO_SECRET` | Must equal `MEDUSA_SSO_SECRET` on the Payload service. Generate with `openssl rand -hex 32`; never commit it. To rotate, change it on both services and redeploy both |
+
+The iframe only keeps Payload's auth cookie when Admin and Payload share a
+registrable domain (e.g. `api.shop.pl` and `cms.shop.pl`). Two default
+`*.up.railway.app` domains do **not** qualify (`up.railway.app` is on the
+Public Suffix List), so attach a custom domain to both services. On the
+Payload side set `MEDUSA_ADMIN_URL` to the exact origin where Medusa serves
+`/app`; Payload uses it for `frame-ancestors`. `ADMIN_CORS`/`AUTH_CORS` do not
+change: the iframe makes no cross-origin API calls.
+
 ### Medusa / misc
 | Var | Notes |
 |---|---|

@@ -1,3 +1,4 @@
+import { resolve } from "node:path";
 import { loadEnv, defineConfig } from "@medusajs/framework/utils";
 import { Modules } from "@medusajs/framework/utils";
 import { requireSecret } from "./src/config/env";
@@ -19,6 +20,13 @@ const inpostOptions = {
 module.exports = defineConfig({
   admin: {
     disable: process.env.ADMIN_DISABLED === "true" || false,
+    // "@/..." resolves to "src/..." in admin code. Mirrors `paths` in
+    // tsconfig.json and src/admin/tsconfig.json; only the admin bundle
+    // resolves it - server code is compiled by plain tsc, which does not
+    // rewrite aliases, so it keeps relative imports.
+    vite: () => ({
+      resolve: { alias: { "@": resolve(process.cwd(), "src") } },
+    }),
   },
   featureFlags: {
     translation: true,
