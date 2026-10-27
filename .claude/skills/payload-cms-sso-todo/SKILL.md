@@ -21,7 +21,7 @@ The Payload half is **done** in `simple-landing-page-nuxt/payload-cms` (branch `
 - Endpoint: `GET {PAYLOAD_PUBLIC_URL}/api/users/sso/medusa?token=<jwt>`.
 - JWT: `HS256`, claims `iss: "medusa-admin"`, `aud: "payload"`, `email` (string), `iat`, `exp`. `exp - iat` must be at most 120 seconds (use 60).
 - Shared secret: `PAYLOAD_SSO_SECRET` here, `MEDUSA_SSO_SECRET` in Payload. Same value, long and random (for example `openssl rand -hex 32`).
-- Payload only logs in users it created through SSO (`ssoManaged`). An existing Payload user with the same email that was created by hand gets `403`.
+- Payload matches the user by email. A missing user is created (flag `ssoManaged`); an existing one, including an account created by hand in Payload, is signed in as is and keeps its password.
 - Payload env needed for this: `MEDUSA_SSO_SECRET`, `MEDUSA_ADMIN_URL` (origin of the Medusa admin, used for `frame-ancestors`), optional `PAYLOAD_COOKIE_DOMAIN`.
 
 ## Tasks
@@ -55,4 +55,4 @@ The Payload half is **done** in `simple-landing-page-nuxt/payload-cms` (branch `
 
 - Signing out of Medusa does not sign out of Payload. The Payload cookie lives until its normal expiry (2 hours by default).
 - Tokens are short-lived but not one-time; there is no server-side replay store. A token only works for 60 seconds and only reaches the browser of the signed-in admin.
-- Every Medusa admin user gets a Payload account with full admin rights. If Payload needs roles, add a mapping from the Medusa user to a Payload role on both sides.
+- Every Medusa admin user gets a Payload account with full admin rights, and anyone who can create a Medusa admin user with a given email can sign in to the Payload account with that email. If Payload needs roles, add a mapping from the Medusa user to a Payload role on both sides.
