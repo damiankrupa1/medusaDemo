@@ -1,0 +1,109 @@
+name: Ephemeral e2e Medusa
+description: >-
+  Starts a throwaway Medusa for the storefront's Playwright suite: PostgreSQL
+  and Redis in Docker (tmpfs), migrations without the demo seed, the
+  deterministic e2e seed, `medusa start` in the background and a readiness
+  check. Exports E2E_MEDUSA_BACKEND_URL and E2E_MEDUSA_PUBLISHABLE_KEY to the
+  rest of the calling job. Never production data (docs/e2e.md).
+
+# A composite action rather than a reusable workflow (`workflow_call`): a
+# called workflow runs as its own job on its own runner, so the Medusa it
+# starts would not be reachable from the storefront's test job. A composite
+# action runs inside the caller's job.
+#
+# Requirements in the calling job: ubuntu runner (Docker), Node 22 and pnpm 11
+# already on PATH (the storefront's e2e.yml sets both up).
+
+inputs:
+  port:
+    description: Port of the e2e Medusa on 127.0.0.1
+    default: "9100"
+  storefront-origins:
+    description: Comma-separated origins allowed by STORE_CORS / AUTH_CORS
+    default: http://127.0.0.1:3100,http://localhost:3100
+  stripe-secret-key:
+    description: >-
+      Optional Stripe TEST secret key (sk_test_...), from a secret. Without it
+      Stripe is registered but not attached to any region.
+    default: ""
+
+outputs:
+  backend-url:
+    description: Base URL of the e2e Medusa
+    value: ${{ steps.export.outputs.E2E_MEDUSA_BACKEND_URL }}
+  publishable-key:
+    description: Publishable API key of the seeded "E2E Storefront" sales channel
+    value: ${{ steps.export.outputs.E2E_MEDUSA_PUBLISHABLE_KEY }}
+  log-file:
+    description: Medusa server log, to upload when the job fails
+    value: ${{ steps.paths.outputs.log }}
+
+runs:
+  using: composite
+  steps:
+    - name: Locate the medusaDemo checkout and check the toolchain
+      id: paths
+      shell: bash
+      run: |
+        root="$(cd "$GITHUB_ACTION_PATH/../../.." && pwd)"
+        echo "root=$root" >> "$GITHUB_OUTPUT"
+        echo "log=$RUNNER_TEMP/e2e-medusa.log" >> "$GITHUB_OUTPUT"
+        node_major="$(node -p 'process.versions.node.split(".")[0]')"
+        pnpm_major="$(pnpm --version | cut -d. -f1)"
+        if [ "$node_major" -lt 22 ] || [ "$pnpm_major" != "11" ]; then
+          echo "::error::The e2e Medusa needs Node 22+ and pnpm 11 on PATH (found node $node_major, pnpm $pnpm_major)"
+          exit 1
+        fi
+
+    - name: Start PostgreSQL and Redis (tmpfs, 127.0.0.1 only)
+      shell: bash
+      run: docker compose -f "${{ steps.paths.outputs.root }}/docker-compose.e2e.yml" up -d --wait
+
+    - name: Install medusaDemo dependencies
+      shell: bash
+      working-directory: ${{ steps.paths.outputs.root }}
+      run: pnpm install --frozen-lockfile
+
+    - name: Migrate (without the demo seed) and run the e2e seed
+      shell: bash
+      working-directory: ${{ steps.paths.outputs.root }}/apps/backend
+      env:
+        E2E_MEDUSA_PORT: ${{ inputs.port }}
+        E2E_STOREFRONT_ORIGINS: ${{ inputs.storefront-origins }}
+        E2E_STRIPE_SECRET_KEY: ${{ inputs.stripe-secret-key }}
+        E2E_SEED_OUTPUT_FILE: ${{ runner.temp }}/e2e-medusa.env
+      run: |
+        rm -f "$E2E_SEED_OUTPUT_FILE"
+        pnpm e2e:setup
+
+    - name: Start Medusa in the background
+      shell: bash
+      working-directory: ${{ steps.paths.outputs.root }}/apps/backend
+      env:
+        E2E_MEDUSA_PORT: ${{ inputs.port }}
+        E2E_STOREFRONT_ORIGINS: ${{ inputs.storefront-origins }}
+        E2E_STRIPE_SECRET_KEY: ${{ inputs.stripe-secret-key }}
+      run: nohup pnpm e2e:start > "${{ steps.paths.outputs.log }}" 2>&1 &
+
+    - name: Wait until Medusa is ready
+      shell: bash
+      run: |
+        url="http://127.0.0.1:${{ inputs.port }}/health/ready"
+        for _ in $(seq 1 90); do
+          if curl -fsS "$url" > /dev/null 2>&1; then
+            curl -fsS "$url"
+            exit 0
+          fi
+          sleep 2
+        done
+        echo "::error::The e2e Medusa did not become ready at $url"
+        tail -n 100 "${{ steps.paths.outputs.log }}"
+        exit 1
+
+    - name: Export the storefront variables
+      id: export
+      shell: bash
+      run: |
+        cat "$RUNNER_TEMP/e2e-medusa.env" >> "$GITHUB_OUTPUT"
+        cat "$RUNNER_TEMP/e2e-medusa.env" >> "$GITHUB_ENV"
+        cat "$RUNNER_TEMP/e2e-medusa.env"
