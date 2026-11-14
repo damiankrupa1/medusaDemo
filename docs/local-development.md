@@ -119,6 +119,10 @@ throwaway Postgres databases via `pg-god`, using `DB_HOST`/`DB_USERNAME`/
 `DATABASE_URL`, which those test runners ignore entirely). They point at
 the same `docker compose` Postgres by default.
 
+The throwaway Medusa for the storefront's Playwright suite (its own
+`docker-compose.e2e.yml`, `pnpm e2e:setup` / `pnpm e2e:start`) is described
+in [docs/e2e.md](e2e.md).
+
 ## 6. Production build simulation
 
 **Don't run a second, independent `pnpm install --prod` inside

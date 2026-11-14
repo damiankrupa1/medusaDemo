@@ -97,6 +97,7 @@ Run from repo root unless noted otherwise.
 | Backend integration tests (modules) | `cd apps/backend && pnpm test:integration:modules` |
 | Run migration script | `cd apps/backend && pnpm medusa exec ./src/migration-scripts/<file>.ts` |
 | Generate/run migrations | `cd apps/backend && pnpm medusa db:generate <module>` / `pnpm medusa db:migrate` |
+| E2E Medusa for the storefront suite | `docker compose -f docker-compose.e2e.yml up -d --wait`, then `cd apps/backend && pnpm e2e:setup && pnpm e2e:start` (see `docs/e2e.md`) |
 
 Notes:
 
@@ -105,6 +106,8 @@ Notes:
 - Prefer `pnpm` scripts over `npm`, `yarn`, or direct `jest`/`medusa`/`next` invocation.
 - Root workspace commands may operate on a legacy/template storefront directory in this checkout, but do not start, build, or lint the separately checked-out Nuxt storefront.
 - Do not use this repository's scripts or packages, including the legacy/template storefront, to infer the Nuxt app's commands, framework setup, ports, or implementation details.
+- Every file in `src/migration-scripts` runs on `medusa db:migrate`, production included. Seeds for tests or demos belong in `src/scripts` and run with `medusa exec`.
+- The e2e environment (`docs/e2e.md`: `docker-compose.e2e.yml`, `scripts/e2e-medusa.mjs`, `src/scripts/e2e-seed.ts`, `.github/actions/e2e-medusa`) must never point at production data. Keep the seed's handles in sync with the storefront's `tests/e2e/support/test-data.ts`.
 
 ---
 
