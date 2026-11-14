@@ -1,0 +1,42 @@
+# Throwaway PostgreSQL + Redis for the storefront's e2e suite (docs/e2e.md).
+#
+# Never point anything here at production data. Both services keep their data
+# in tmpfs only: `docker compose -f docker-compose.e2e.yml down` (or a reboot)
+# wipes it, and every run starts from an empty database. Ports are bound to
+# 127.0.0.1 and differ from docker-compose.yml, so this stack can run next to
+# the regular dev stack without touching its database.
+#
+#   docker compose -f docker-compose.e2e.yml up -d --wait
+#   docker compose -f docker-compose.e2e.yml down -v
+
+name: medusa-e2e
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: medusa_e2e
+      POSTGRES_PASSWORD: medusa_e2e
+      # The e2e seed refuses databases whose name does not contain "e2e"
+      POSTGRES_DB: medusa_e2e
+    ports:
+      - "127.0.0.1:55432:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U medusa_e2e -d medusa_e2e"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  redis:
+    image: redis:7-alpine
+    # No persistence: nothing in this stack may outlive the run
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports:
+      - "127.0.0.1:56379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 5s
+      retries: 30

@@ -17,6 +17,11 @@
     "start": "medusa start",
     "dev": "medusa develop",
     "migrate": "medusa db:migrate",
+    "e2e:migrate": "node scripts/e2e-medusa.mjs migrate",
+    "e2e:seed": "node scripts/e2e-medusa.mjs seed",
+    "e2e:setup": "node scripts/e2e-medusa.mjs setup",
+    "e2e:start": "node scripts/e2e-medusa.mjs start",
+    "e2e:smoke": "node scripts/e2e-smoke.mjs",
     "test:integration:http": "cross-env TEST_TYPE=integration:http NODE_OPTIONS=--experimental-vm-modules jest --silent=false --runInBand --forceExit",
     "test:integration:modules": "cross-env TEST_TYPE=integration:modules NODE_OPTIONS=--experimental-vm-modules jest --silent=false --runInBand --forceExit",
     "test:unit": "cross-env TEST_TYPE=unit NODE_OPTIONS=--experimental-vm-modules jest --silent --runInBand --forceExit"
