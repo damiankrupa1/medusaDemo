@@ -117,6 +117,13 @@ configured - missing: ...` on boot and falls back to the local-disk file
 provider - fine for a quick test, **not** fine for production on Railway,
 since the container filesystem is ephemeral and wiped on every redeploy.
 
+### InPost (Server + Worker)
+| Var | Notes |
+|---|---|
+| `INPOST_API_TOKEN` | **Required**; the InPost provider refuses to boot without it. A token for the environment `INPOST_SANDBOX` selects (sandbox and production tokens are issued separately) |
+| `INPOST_ORGANIZATION_ID` | **Required**; same reason |
+| `INPOST_SANDBOX` | `false` uses the live InPost API (`api-shipx-pl.easypack24.net`, and for returns `api.inpost.pl`); anything else, including unset, uses the **sandbox** (`sandbox-api-shipx-pl.easypack24.net`: no real parcels, labels that don't work). Set it explicitly in production: unset or unrecognised logs `[inpost] INPOST_SANDBOX is not set ...` on boot and keeps the sandbox (it does not refuse to boot). `true` is the deliberate way to stay on the sandbox |
+
 ### Payload CMS (Server service)
 
 Only needed for the "CMS" page in Admin, which embeds the Payload admin panel
