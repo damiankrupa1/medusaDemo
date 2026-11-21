@@ -10,7 +10,18 @@ const decode = (part: string) =>
   JSON.parse(Buffer.from(part, "base64url").toString("utf-8"))
 
 describe("signPayloadSsoToken", () => {
-  const token = signPayloadSsoToken("admin@test.com", SECRET, NOW)
+  const token = signPayloadSsoToken(
+    {
+      sub: "user_1",
+      email: "admin@test.com",
+      name: "Admin User",
+      role: "admin",
+      jti: "test-jti",
+      redirect: "/admin",
+    },
+    SECRET,
+    NOW
+  )
   const [header, claims, signature] = token.split(".")
 
   it("is a three part HS256 JWT", () => {
@@ -22,7 +33,12 @@ describe("signPayloadSsoToken", () => {
     expect(decode(claims)).toEqual({
       iss: "medusa-admin",
       aud: "payload",
+      sub: "user_1",
       email: "admin@test.com",
+      name: "Admin User",
+      role: "admin",
+      jti: "test-jti",
+      redirect: "/admin",
       iat: NOW,
       exp: NOW + 60,
     })

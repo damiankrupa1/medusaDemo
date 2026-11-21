@@ -28,10 +28,11 @@ export async function GET(
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
   const { data: users } = await query.graph({
     entity: "user",
-    fields: ["email"],
+    fields: ["id", "email", "first_name", "last_name", "metadata"],
     filters: { id: req.auth_context.actor_id },
   })
-  const email = users[0]?.email
+  const user = users[0]
+  const email = user?.email
 
   if (!email) {
     res.status(403).json({
@@ -41,7 +42,41 @@ export async function GET(
     return
   }
 
+  const firstName =
+    typeof user.first_name === "string" ? user.first_name.trim() : ""
+  const lastName =
+    typeof user.last_name === "string" ? user.last_name.trim() : ""
+  const name = [firstName, lastName].filter(Boolean).join(" ") || undefined
+
+  const payloadRole =
+    user.metadata &&
+    typeof user.metadata === "object" &&
+    "payload_role" in user.metadata &&
+    typeof user.metadata.payload_role === "string"
+      ? user.metadata.payload_role
+    : "admin"
+
+  const role = (
+    ["none", "viewer", "editor", "publisher", "admin"] as const
+  ).includes(
+    payloadRole as "none" | "viewer" | "editor" | "publisher" | "admin"
+  )
+    ? (payloadRole as "none" | "viewer" | "editor" | "publisher" | "admin")
+    : "none"
+
   res.json({
-    url: buildPayloadSsoUrl(payloadUrl, signPayloadSsoToken(email, secret)),
+    url: buildPayloadSsoUrl(
+      payloadUrl,
+      signPayloadSsoToken(
+        {
+          sub: String(req.auth_context.actor_id),
+          email,
+          name,
+          role,
+          redirect: "/admin",
+        },
+        secret
+      )
+    ),
   })
 }
