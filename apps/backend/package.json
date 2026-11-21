@@ -43,7 +43,7 @@
     "ioredis": "5.11.1",
     "medusa-inpost-fulfillment": "^0.5.3",
     "react-i18next": "13.5.0",
-    "react-router-dom": "6.30.4",
+    "react-router-dom": "7.18.2",
     "zod": "4.2.0"
   },
   "devDependencies": {
