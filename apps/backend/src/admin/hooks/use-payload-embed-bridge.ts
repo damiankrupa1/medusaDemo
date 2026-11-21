@@ -74,7 +74,7 @@ const getHostTheme = (iframe: HTMLIFrameElement): Theme => {
 
 export const usePayloadEmbedBridge = (url?: string) => {
   const iframeRef = useRef<HTMLIFrameElement>(null)
-  const lastTheme = useRef<string>()
+  const lastTheme = useRef<string | undefined>(undefined)
   const { i18n } = useTranslation()
   const targetOrigin = url ? new URL(url).origin : undefined
 

@@ -3,11 +3,13 @@ import { Container, Text } from "@medusajs/ui"
 import { useTranslation } from "react-i18next"
 import { usePayloadSsoUrl } from "@/admin/hooks/use-payload-sso-url"
 import { usePayloadEmbedBridge } from "@/admin/hooks/use-payload-embed-bridge"
+import { useUnconstrainedWidth } from "@/admin/hooks/use-unconstrained-width"
 
 const CmsPage = () => {
   const { t } = useTranslation()
   const { data: url, isError, error } = usePayloadSsoUrl()
   const { iframeRef, onLoad } = usePayloadEmbedBridge(url)
+  useUnconstrainedWidth(iframeRef, Boolean(url))
 
   if (isError) {
     return (
