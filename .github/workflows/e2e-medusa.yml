@@ -1,0 +1,73 @@
+name: E2E Medusa
+
+# Self-test of .github/actions/e2e-medusa, the ephemeral Medusa the
+# storefront's Playwright suite (damiankrupa1/nuxtMedusa, e2e.yml) runs
+# against: start it from an empty database, check it through the Store API,
+# and run the seed a second time to prove it is idempotent. Never production
+# data (docs/e2e.md).
+
+on:
+  pull_request:
+    paths:
+      - .github/actions/e2e-medusa/**
+      - .github/workflows/e2e-medusa.yml
+      - docker-compose.e2e.yml
+      - apps/backend/**
+      - pnpm-lock.yaml
+  workflow_dispatch:
+
+concurrency:
+  group: e2e-medusa-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  e2e-medusa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # pnpm must be on PATH before setup-node, whose `cache: pnpm` runs it
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Start the e2e Medusa
+        id: medusa
+        uses: ./.github/actions/e2e-medusa
+
+      - name: Unit tests of the seed, its guard and the launcher
+        working-directory: apps/backend
+        run: pnpm test:unit
+
+      - name: Check it through the Store API
+        working-directory: apps/backend
+        run: pnpm e2e:smoke
+
+      - name: Run the seed again (idempotent, same publishable key)
+        working-directory: apps/backend
+        env:
+          E2E_SEED_OUTPUT_FILE: ${{ runner.temp }}/second-run.env
+        run: |
+          pnpm e2e:seed
+          grep -qx "E2E_MEDUSA_PUBLISHABLE_KEY=${{ steps.medusa.outputs.publishable-key }}" "$E2E_SEED_OUTPUT_FILE"
+          pnpm e2e:smoke
+
+      - name: Upload the Medusa log
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-medusa-log
+          path: ${{ steps.medusa.outputs.log-file }}
+          retention-days: 7
+          if-no-files-found: ignore
