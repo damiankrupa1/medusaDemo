@@ -157,12 +157,18 @@ export default async function e2eSeed({ container }: ExecArgs) {
       fields: ["id", "token", "revoked_at", "sales_channels.id"],
       filters: { title: E2E_PUBLISHABLE_KEY_TITLE, type: "publishable" },
     })
-    let apiKey = data.find((key) => !key.revoked_at)
-    let linkedChannelIds = (apiKey?.sales_channels ?? []).map(
-      (channel) => channel?.id
-    )
+    const existing = data.find((key) => !key.revoked_at)
+    // Only what is used below: the graph row and the workflow result are
+    // different shapes, so neither can stand in for the other's full type.
+    let apiKey: { id: string; token: string }
+    let linkedChannelIds: (string | undefined)[]
 
-    if (!apiKey) {
+    if (existing) {
+      apiKey = existing
+      linkedChannelIds = (existing.sales_channels ?? []).map(
+        (channel) => channel?.id
+      )
+    } else {
       const { result } = await createApiKeysWorkflow(container).run({
         input: {
           api_keys: [
@@ -170,7 +176,7 @@ export default async function e2eSeed({ container }: ExecArgs) {
           ],
         },
       })
-      apiKey = { ...result[0], sales_channels: [] }
+      apiKey = result[0]
       linkedChannelIds = []
     }
 
@@ -295,9 +301,14 @@ export default async function e2eSeed({ container }: ExecArgs) {
       fields: ["id", "fulfillment_providers.id", "sales_channels.id"],
       filters: { name: E2E_STOCK_LOCATION.name },
     })
-    let location = data[0]
+    // A location created below has no providers or channels linked yet, so
+    // `existing` stays undefined and the link lists below are empty.
+    const existing = data[0]
+    let locationId: string
 
-    if (!location) {
+    if (existing) {
+      locationId = existing.id
+    } else {
       const { result } = await createStockLocationsWorkflow(container).run({
         input: {
           locations: [
@@ -305,29 +316,29 @@ export default async function e2eSeed({ container }: ExecArgs) {
           ],
         },
       })
-      location = { id: result[0].id, fulfillment_providers: [], sales_channels: [] }
+      locationId = result[0].id
     }
 
     const linkedProviders = new Set(
-      (location.fulfillment_providers ?? []).map((provider) => provider?.id)
+      (existing?.fulfillment_providers ?? []).map((provider) => provider?.id)
     )
     for (const providerId of Object.values(FULFILLMENT_PROVIDERS)) {
       if (!linkedProviders.has(providerId)) {
         await link.create({
-          [Modules.STOCK_LOCATION]: { stock_location_id: location.id },
+          [Modules.STOCK_LOCATION]: { stock_location_id: locationId },
           [Modules.FULFILLMENT]: { fulfillment_provider_id: providerId },
         })
       }
     }
 
-    const linkedChannels = (location.sales_channels ?? []).map((channel) => channel?.id)
+    const linkedChannels = (existing?.sales_channels ?? []).map((channel) => channel?.id)
     if (!linkedChannels.includes(channelId)) {
       await linkSalesChannelsToStockLocationWorkflow(container).run({
-        input: { id: location.id, add: [channelId] },
+        input: { id: locationId, add: [channelId] },
       })
     }
 
-    return location.id
+    return locationId
   }
 
   async function ensureServiceZones(locationId: string): Promise<Record<string, string>> {
