@@ -111,6 +111,8 @@ export function buildE2eEnv(ambient = process.env) {
     // (that happens on fulfillment, which the storefront never triggers).
     INPOST_API_TOKEN: "e2e-placeholder-not-a-token",
     INPOST_ORGANIZATION_ID: "e2e-placeholder",
+    // Pinned so a shell-exported INPOST_SANDBOX=false can't reach the live API.
+    INPOST_SANDBOX: "true",
 
     // Local file storage, no bucket
     S3_FILE_URL: "",

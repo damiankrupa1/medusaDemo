@@ -3,14 +3,21 @@ import { loadEnv, defineConfig } from "@medusajs/framework/utils";
 import { Modules } from "@medusajs/framework/utils";
 import { requireSecret } from "./src/config/env";
 import { getFileProvider } from "./src/config/file-storage";
+import { resolveInpostSandbox } from "./src/config/inpost";
 
 loadEnv(process.env.NODE_ENV || "development", process.cwd());
+
+const inpostSandbox = resolveInpostSandbox();
+if (inpostSandbox.warning) {
+  console.warn(`[inpost] ${inpostSandbox.warning}`);
+}
 
 const inpostOptions = {
   apiToken: process.env.INPOST_API_TOKEN,
   organizationId: process.env.INPOST_ORGANIZATION_ID,
 
-  sandbox: true,
+  // INPOST_SANDBOX=false selects the live InPost API; the default is the sandbox.
+  sandbox: inpostSandbox.sandbox,
 
   defaultParcelTemplate: "small",
   defaultLabelFormat: "pdf",

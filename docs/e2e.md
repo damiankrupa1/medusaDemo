@@ -79,7 +79,9 @@ local file storage (all `S3_*` empty), Payload SSO off, `JWT_SECRET` /
 `COOKIE_SECRET` random per process. The InPost provider refuses to boot
 without `INPOST_API_TOKEN` and `INPOST_ORGANIZATION_ID`, so both get
 placeholders (`e2e-placeholder...`); they are not credentials, and nothing in
-the suite reaches ShipX (only fulfilling an order would).
+the suite reaches ShipX (only fulfilling an order would). `INPOST_SANDBOX` is
+pinned to `true` (the sandbox API; unset means the same, and only `false`
+selects the live API).
 
 ### Safety guard
 
