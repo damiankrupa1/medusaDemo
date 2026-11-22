@@ -108,6 +108,7 @@ Notes:
 - Do not use this repository's scripts or packages, including the legacy/template storefront, to infer the Nuxt app's commands, framework setup, ports, or implementation details.
 - Every file in `src/migration-scripts` runs on `medusa db:migrate`, production included. Seeds for tests or demos belong in `src/scripts` and run with `medusa exec`.
 - The e2e environment (`docs/e2e.md`: `docker-compose.e2e.yml`, `scripts/e2e-medusa.mjs`, `src/scripts/e2e-seed.ts`, `.github/actions/e2e-medusa`) must never point at production data. Keep the seed's handles in sync with the storefront's `tests/e2e/support/test-data.ts`.
+- `src/api/middlewares.ts` refuses registering an e-mail that already has an `emailpass` identity (401 "Identity with email already exists", with or without a customer, any letter case) and refuses actor types missing from `authMethodsPerActor` (`src/config/auth.ts`: `customer`/`user` with `emailpass`; Medusa itself lets unlisted actor types through). Code in `src/lib/auth-registration`, details in `docs/auth-registration.md`. A new auth provider or actor type must be added to that map. `src/scripts/list-orphan-identities.ts` lists identities without an actor and deletes them only with `apply`.
 
 ---
 
