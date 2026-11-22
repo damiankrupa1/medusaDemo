@@ -4,6 +4,7 @@ import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { Modules } from "@medusajs/framework/utils"
 import {
   createApiKeysWorkflow,
+  createInvitesWorkflow,
   createSalesChannelsWorkflow,
   linkSalesChannelsToApiKeyWorkflow,
 } from "@medusajs/medusa/core-flows"
@@ -197,6 +198,83 @@ medusaIntegrationTestRunner({
         })
         expect(invalid.status).toBe(401)
         expect(await countIdentities("no-password@example.com")).toBe(0)
+      })
+    })
+
+    describe("actor types (authMethodsPerActor)", () => {
+      it.each(["anything", "Customer", "admin"])(
+        "the %s actor type is refused for registration and sign-in",
+        async (actor) => {
+          const email = `actor-${actor.toLowerCase()}@example.com`
+
+          const registered = await register(email, "password", actor)
+          expect(registered.status).toBe(400)
+          expect(registered.data).toEqual({
+            type: "not_allowed",
+            message: `The actor type ${actor} is not allowed to use the auth provider emailpass`,
+          })
+          expect(await countIdentities(email)).toBe(0)
+
+          await register(email, "password")
+          expect((await login(email, "password", actor)).status).toBe(400)
+          expect((await login(email, "password")).status).toBe(200)
+        }
+      )
+
+      it("an admin invite is accepted with a user registration", async () => {
+        const container = getContainer()
+        const {
+          result: [invite],
+        } = await createInvitesWorkflow(container).run({
+          input: { invites: [{ email: "invited-admin@example.com" }] },
+        })
+
+        const registered = await register(
+          "invited-admin@example.com",
+          "admin-password",
+          "user"
+        )
+        expect(registered.status).toBe(200)
+
+        const accepted = await post(
+          `/admin/invites/accept?token=${invite.token}`,
+          { first_name: "Invited", last_name: "Admin" },
+          { authorization: `Bearer ${registered.data.token}` }
+        )
+        expect(accepted.status).toBe(200)
+
+        const signedIn = await login(
+          "invited-admin@example.com",
+          "admin-password",
+          "user"
+        )
+        expect(signedIn.status).toBe(200)
+
+        const me = await api.get("/admin/users/me", {
+          headers: { authorization: `Bearer ${signedIn.data.token}` },
+        })
+        expect(me.data.user.email).toBe("invited-admin@example.com")
+      })
+
+      it("the admin login page's provider list and the token refresh still work", async () => {
+        const providers = await api.get("/auth/user/providers")
+        expect(providers.status).toBe(200)
+        expect(providers.data.providers).toEqual([
+          expect.objectContaining({ id: "emailpass" }),
+        ])
+
+        const email = "refresh@example.com"
+        const { data } = await register(email, "password")
+        await createCustomer(email, data.token)
+        const signedIn = await login(email, "password")
+
+        const refreshed = await post(
+          "/auth/token/refresh",
+          {},
+          { authorization: `Bearer ${signedIn.data.token}` }
+        )
+        expect(refreshed.status).toBe(200)
+        expect(refreshed.data.token).toEqual(expect.any(String))
       })
     })
   },

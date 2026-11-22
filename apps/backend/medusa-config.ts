@@ -1,6 +1,7 @@
 import { resolve } from "node:path";
 import { loadEnv, defineConfig } from "@medusajs/framework/utils";
 import { Modules } from "@medusajs/framework/utils";
+import { AUTH_METHODS_PER_ACTOR } from "./src/config/auth";
 import { requireSecret } from "./src/config/env";
 import { getFileProvider } from "./src/config/file-storage";
 import { resolveInpostSandbox } from "./src/config/inpost";
@@ -50,6 +51,8 @@ module.exports = defineConfig({
       authCors: process.env.AUTH_CORS!,
       jwtSecret: requireSecret("JWT_SECRET"),
       cookieSecret: requireSecret("COOKIE_SECRET"),
+      // customer and user sign in with e-mail/password only (src/config/auth.ts)
+      authMethodsPerActor: AUTH_METHODS_PER_ACTOR,
     },
   },
   plugins: [
