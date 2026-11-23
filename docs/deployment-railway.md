@@ -144,6 +144,23 @@ Payload side set `MEDUSA_ADMIN_URL` to the exact origin where Medusa serves
 `/app`; Payload uses it for `frame-ancestors`. `ADMIN_CORS`/`AUTH_CORS` do not
 change: the iframe makes no cross-origin API calls.
 
+### Auth rate limit (Server service)
+
+Login and registration with e-mail and password are limited per e-mail on
+the Redis of `REDIS_URL` (10 failed customer logins / 15 min, 5 failed admin
+logins / 15 min, 5 registrations / 1 h; details in
+[auth-rate-limit.md](auth-rate-limit.md)). Nothing to set: it is on by
+default. The per-IP limit is a WAF rule on the storefront's Vercel project,
+not here.
+
+| Var | Notes |
+|---|---|
+| `AUTH_RATE_LIMIT_ENABLED` | Leave unset (on). `false` turns the limit off, with `[auth-rate-limit] AUTH_RATE_LIMIT_ENABLED is off ...` on boot; an emergency switch only |
+
+If Redis fails, logins go through unlimited (fail open) and the logs show
+`[auth-rate-limit] could not check the ... limit, letting the request through
+(fail open)` or `[auth-rate-limit] Redis connection error: ...`.
+
 ### Medusa / misc
 | Var | Notes |
 |---|---|
@@ -161,6 +178,10 @@ Confirmed by reading the actual config, not assumed:
   store when set (falls back to an in-memory store otherwise - fine for a
   single instance, but you have two: Server + Worker, so `REDIS_URL` should
   always be set in production).
+- The auth rate limit (`src/lib/auth-rate-limit`, wired in
+  `src/api/middlewares.ts`) opens its own connection to `REDIS_URL` on the
+  Server and keeps its counters under `auth-rate-limit:*` keys, each with a
+  TTL of at most one hour ([auth-rate-limit.md](auth-rate-limit.md)).
 - No caching module or scheduled jobs currently exist in this project
   (`src/jobs` and `src/subscribers` are empty scaffolding) - nothing else to
   reconfigure for Redis right now.
