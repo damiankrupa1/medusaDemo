@@ -466,6 +466,11 @@ provider and its preview-domain configuration are not specified here.
 - [ ] Uploaded product image is reachable in a private browser window (see
       [Storage security](#8-storage-security--testing-checklist))
 - [ ] `pnpm --filter=@dtc/backend build` succeeds locally before pushing
+- [ ] After the first deploy with the registration rule
+      ([auth-registration.md](auth-registration.md)): in a shell of the
+      Server service, `cd /repo/apps/backend && pnpm medusa exec
+      ./src/scripts/list-orphan-identities.ts` (lists only, deletes nothing);
+      `apply` only deliberately
 
 ## 12. Backup strategy
 
